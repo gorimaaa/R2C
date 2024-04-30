@@ -1,20 +1,44 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-export default function App() {
+const FormItem = ({ name, formName }) => {
+  const navigation = useNavigation();
+
+  const navigateToForm = () => {
+    navigation.navigate('Form', { formName });
+  };
+
+  return (
+    <TouchableOpacity onPress={navigateToForm} style={styles.formItem}>
+      <Text>{name}</Text>
+    </TouchableOpacity>
+  );
+};
+
+const Forms = () => {
   return (
     <View style={styles.container}>
-      <Text>2</Text>
-      <StatusBar style="auto" />
+      <FormItem name="Formulaire" formName="Form" />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  formItem: {
+    width: '80%',
+    height: 100,
+    backgroundColor: '#e0e0e0',
+    marginBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+  },
 });
+
+export default Forms;

@@ -1,25 +1,20 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import Form from './Form';
 import { useNavigation } from '@react-navigation/native';
 
-const FormItem = ({ name, formName }) => {
+const Forms = () => {
   const navigation = useNavigation();
 
   const navigateToForm = () => {
-    navigation.navigate('Form', { formName });
+    navigation.navigate('Form'); 
   };
 
   return (
-    <TouchableOpacity onPress={navigateToForm} style={styles.formItem}>
-      <Text>{name}</Text>
-    </TouchableOpacity>
-  );
-};
-
-const Forms = () => {
-  return (
     <View style={styles.container}>
-      <FormItem name="Formulaire" formName="Form" />
+      <TouchableOpacity onPress={navigateToForm} style={styles.formItem}>
+        <Text>Formulaire</Text>
+      </TouchableOpacity>
     </View>
   );
 };

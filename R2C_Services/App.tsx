@@ -38,7 +38,7 @@ export default function App() {
     <NavigationContainer>
       <Tab.Navigator initialRouteName='Login'>
         <Tab.Screen name="Page1" component={Page1} />
-        <Tab.Screen name="Forms" component={FormsStackScreen} />
+        <Tab.Screen name="Forms" component={FormsStackScreen} options={{ headerShown: false }}/>
         <Tab.Screen name="Profil" component={Profil} />
         {user ? null : <Tab.Screen name="Login" component={Login} />}
       </Tab.Navigator>

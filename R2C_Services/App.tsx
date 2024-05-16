@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Forms from './App/Screens/FormsScreen/Forms'; 
 import Form from './App/Screens/FormsScreen/Form';
+import Pdf1 from './App/Screens/FormsScreen/Pdf1';
 import Page1 from './App/Screens/CompletedScreen/Completed';
 import Profil from './App/Screens/ProfilScreen/Profil';
 import Login from './App/Screens/LoginScreen/Login';
@@ -20,6 +21,7 @@ function FormsStackScreen() {
     <FormsStack.Navigator>
       <FormsStack.Screen name="Forms" component={Forms} />
       <FormsStack.Screen name="Form" component={Form} />
+      <FormsStack.Screen name="Pdf1" component={Pdf1} />
     </FormsStack.Navigator>
   );
 }

@@ -1,13 +1,14 @@
-import React, { useState,useRef } from "react";
-import SignatureScreen from 'react-native-signature-canvas';
+import React, { useState, useRef } from "react";
+import SignatureScreen from "react-native-signature-canvas";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   TextInput,
-  question,
   Text,
   Button,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 
 const Form = () => {
@@ -25,29 +26,36 @@ const Form = () => {
   const [fourniture, setFourniture] = useState("");
   const [nomtech, setNomTech] = useState("");
   const [nomSite, setNomSite] = useState("");
-
+  const [signature, setSignature] = useState("");
   const option1 = ["Intervention", "Devis", "Selon devis"];
   const option2 = ["Oui", "Non"];
-
-  const handleOptionSelect = (option) => {
+  const navigation = useNavigation();
+  const handleOptionSelectTypeIntervention = (option) => {
     setTypeIntervention(option);
+  };
+  const handleOptionSelectDevis = (option) => {
     setDevis(option);
   };
   const question1 = "Type d'intervention";
   const question2 = "Un devis est-il a suivre ?";
-  const handleSubmit = () => {};
-  const signatureRef = useRef();
-  const [isSigning, setIsSigning] = useState(false); // État pour indiquer si l'utilisateur est en train de signer
 
-  const handleSignature = () => {
-    setIsSigning(false); 
+  const signatureRef = useRef(null);
+  const handleSignature = (signature) => {
+    setSignature(signature);
+  };
+  const handleClearSignature = () => {
+  
+    if (signatureRef.current) {
+      signatureRef.current.clearSignature();
+      setSignature("");
+    }
+  };
+  const handleSubmit = () => {
+    navigation.navigate("Pdf1");
   };
 
-  const handleDragStart = () => {
-    setIsSigning(true); 
-  };
   return (
-    <ScrollView >
+    <ScrollView>
       <View style={styles.container}>
         <TextInput
           style={styles.input}
@@ -91,7 +99,7 @@ const Form = () => {
             <Button
               key={index}
               title={option}
-              onPress={() => handleOptionSelect(option)}
+              onPress={() => handleOptionSelectTypeIntervention(option)}
               color={typeIntervention === option ? "green" : "gray"}
             />
           ))}
@@ -102,7 +110,7 @@ const Form = () => {
             <Button
               key={index}
               title={option}
-              onPress={() => handleOptionSelect(option)}
+              onPress={() => handleOptionSelectDevis(option)}
               color={devis === option ? "green" : "gray"}
             />
           ))}
@@ -145,15 +153,13 @@ const Form = () => {
         />
         <Text style={styles.signatureLabel}>Signature :</Text>
         <View style={styles.signatureContainer}>
-          <SignatureScreen
-            ref={signatureRef}
-           
-            onDragStart={handleDragStart} 
-            
-          />
+          <SignatureScreen ref={signatureRef} onOK={handleSignature} />
         </View>
+        <Button title="Effacer" onPress={handleClearSignature} />
 
-        <Button title="Soumettre" onPress={handleSubmit} />
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Soumettre</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -221,10 +227,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   signatureContainer: {
-    width: '100%',
+    width: "100%",
     height: 200, // Taille de la zone de signature
     borderWidth: 1,
-    borderColor: '#000',
+    borderColor: "#000",
+  },
+  submitButton: {
+    backgroundColor: "green",
+    padding: 10,
+    borderRadius: 5,
+  },
+  submitButtonText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
   },
 });
 

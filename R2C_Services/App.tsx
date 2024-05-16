@@ -10,6 +10,7 @@ import Pdf1 from './App/Screens/FormsScreen/Pdf1';
 import Page1 from './App/Screens/CompletedScreen/Completed';
 import Profil from './App/Screens/ProfilScreen/Profil';
 import Login from './App/Screens/LoginScreen/Login';
+import SignUp from './App/Screens/SignUpScreen/SignUp';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 
@@ -22,6 +23,15 @@ function FormsStackScreen() {
       <FormsStack.Screen name="Forms" component={Forms} />
       <FormsStack.Screen name="Form" component={Form} />
       <FormsStack.Screen name="Pdf1" component={Pdf1} />
+    </FormsStack.Navigator>
+  );
+}
+
+function LoginStackScreen() {
+  return (
+    <FormsStack.Navigator>
+      <FormsStack.Screen name="Login" component={Login} />
+      <FormsStack.Screen name="SignUp" component={SignUp} />
     </FormsStack.Navigator>
   );
 }
@@ -42,7 +52,7 @@ export default function App() {
         <Tab.Screen name="Page1" component={Page1} />
         <Tab.Screen name="Forms" component={FormsStackScreen} options={{ headerShown: false }}/>
         <Tab.Screen name="Profil" component={Profil} />
-        {user ? null : <Tab.Screen name="Login" component={Login} />}
+        {user ? null : <Tab.Screen name="LoginStackScreen" component={LoginStackScreen}  options={{ headerShown: false }}/>}
       </Tab.Navigator>
     </NavigationContainer>
   );

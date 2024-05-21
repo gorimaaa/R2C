@@ -1,0 +1,3 @@
+${PODS_ROOT}/Target Support Files/Pods-R2C_Services/Pods-R2C_Services-resources.sh
+${PODS_CONFIGURATION_BUILD_DIR}/React-Core/RCTI18nStrings.bundle
+${PODS_CONFIGURATION_BUILD_DIR}/react-native-blob-util/ReactNativeBlobUtilPrivacyInfo.bundle

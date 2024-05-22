@@ -2,11 +2,8 @@ import { Button, StyleSheet, Text, View } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 
-interface RouterProps {
-  navigation : NavigationProp<any, any>;
-}
 
-const Profil = ({navigation}: RouterProps) => {
+const Profil = () => {
   return(
     <View style={styles.container}>
       <Button onPress={() => FIREBASE_AUTH.signOut()} title="Logout"/>

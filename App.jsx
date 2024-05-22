@@ -5,6 +5,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import 'react-native-gesture-handler';
+// react-native-vector-icons/Ionicons otherwise.
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import Forms from './src/FormsScreen/Forms'; 
 import Form from './src/FormsScreen/Form';
 import Pdf1 from './src/FormsScreen/Pdf1';
@@ -41,7 +44,7 @@ function LoginStackScreen() {
 }
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(null);
 
   // On vérifie si un utilisateur s'est connecté ou non
   useEffect(() => {
@@ -52,7 +55,32 @@ export default function App() {
   
   return (
 <NavigationContainer>
-    <Tab.Navigator initialRouteName='Login'>
+    <Tab.Navigator initialRouteName='Login' 
+    screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+
+            if (route.name === 'Forms') {
+              iconName = focused
+                ? 'ios-information-circle'
+                : 'ios-information-circle-outline';
+            } 
+            if (route.name === 'Profil') {
+              iconName = focused ? 'ios-list' : 'ios-list-outline';
+            }
+            if (route.name === 'LoginStackScreen') {
+              iconName = focused ? 'ios-list' : 'ios-list-outline';
+            }
+            if (route.name === 'Pdf') {
+              iconName = focused ? 'ios-list' : 'ios-list-outline';
+            }
+
+            // You can return any component that you like here!
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: 'tomato',
+          tabBarInactiveTintColor: 'gray',
+        })}>
       <Tab.Screen name="Forms" component={FormsStackScreen} options={{ headerShown: false }}/>
       <Tab.Screen name="Profil" component={Profil} />
       {user ? null : <Tab.Screen name="LoginStackScreen" component={LoginStackScreen}  options={{ headerShown: false }}/>}

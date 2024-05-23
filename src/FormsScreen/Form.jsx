@@ -51,7 +51,22 @@ const Form = () => {
     }
   };
   const handleSubmit = () => {
-    navigation.navigate("Pdf1");
+    navigation.navigate("Pdf1", {
+      num,
+      date,
+      heureDebut,
+      heureFin,
+      deplacement,
+      adresse,
+      typeIntervention,
+      devis,
+      devisDesc,
+      description,
+      fourniture,
+      nomtech,
+      nomSite,
+      signature
+    });
   };
 
   return (

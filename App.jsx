@@ -16,6 +16,7 @@ import Profil from './src/ProfilScreen/Profil';
 import SignUp from './src/SignUpScreen/SignUp';
 import Login from './src/LoginScreen/Login';
 import PDF from './src/PdfScreen/Pdf'
+import Test from './src/TestScreen/Test'
 
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
@@ -74,6 +75,9 @@ export default function App() {
             if (route.name === 'Pdf') {
               iconName = focused ? 'ios-list' : 'ios-list-outline';
             }
+            if (route.name === 'Test') {
+              iconName = focused ? 'ios-list' : 'ios-list-outline';
+            }
 
             // You can return any component that you like here!
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -85,6 +89,8 @@ export default function App() {
       <Tab.Screen name="Profil" component={Profil} />
       {user ? null : <Tab.Screen name="LoginStackScreen" component={LoginStackScreen}  options={{ headerShown: false }}/>}
       <Tab.Screen name="Pdf" component={PDF}/>
+      <Tab.Screen name="Test" component={Test}/>
+
     </Tab.Navigator>
 </NavigationContainer>
     

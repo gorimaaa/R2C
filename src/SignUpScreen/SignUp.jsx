@@ -1,210 +1,164 @@
 import { StatusBar } from 'expo-status-bar';
-import { Alert, Button, Image, Pressable, SafeAreaView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import React, { useState } from 'react';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 
-const logo = require("../../assets/logo.png")
-const facebook = require("../../assets/facebook.png")
-const linkedin = require("../../assets/linkedin.png")
-const tiktok = require("../../assets/tiktok.png")
+const logo = require("../../assets/logo.png");
 
 const SignUp = () => {
-    const [click, setClick] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [lastname, setLastname] = useState("");
     const [firstname, setFirstname] = useState("");
-    const auth = FIREBASE_AUTH;
-    const [loading, setLoading] = useState(false); // Ajout de loading
-
+    const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
     const navigateToLogin = () => {
       navigation.navigate('Login'); 
     };
-    const signIn = async () => {
-        try {
-            setLoading(true); // Ajout de setLoading
-            const response = await signInWithEmailAndPassword(auth, username, password);
-        } catch (error) {
-            alert('Echec dans la connexion ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const signUp = async () => {
         try {
-            setLoading(true); // Ajout de setLoading
+            setLoading(true);
+            const auth = FIREBASE_AUTH;
             const response = await createUserWithEmailAndPassword(auth, username, password);
+            setLoading(false);
         } catch (error) {
-            alert('Echec dans l\'inscription ' + error.message);
-        } finally {
+            alert('Échec de l\'inscription: ' + error.message);
             setLoading(false);
         }
     };
 
     return (
         <SafeAreaView style={styles.container}>
-            <Image source={logo} style={styles.image} resizeMode='contain' />
-            <Text style={styles.title}>Inscription</Text>
-            <View style={styles.inputView}>
-                <TextInput
-                    style={styles.input}
-                    placeholder='Nom'
-                    value={lastname}
-                    onChangeText={setLastname}
-                    autoCorrect={false}
-                    autoCapitalize='none'
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder='Prénom'
-                    value={firstname}
-                    onChangeText={setFirstname}
-                    autoCorrect={false}
-                    autoCapitalize='none'
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder='EMAIL OR USERNAME'
-                    value={username}
-                    onChangeText={setUsername}
-                    autoCorrect={false}
-                    autoCapitalize='none'
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder='PASSWORD'
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                    autoCorrect={false}
-                    autoCapitalize='none'
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder='CONFIRM PASSWORD'
-                    secureTextEntry
-                    autoCorrect={false}
-                    autoCapitalize='none'
-                />
-            </View>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <Image source={logo} style={styles.logo} resizeMode='contain' />
+                <Text style={styles.title}>Inscription</Text>
+                <View style={styles.formContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Nom'
+                        value={lastname}
+                        onChangeText={setLastname}
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Prénom'
+                        value={firstname}
+                        onChangeText={setFirstname}
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Email ou Nom d'utilisateur"
+                        value={username}
+                        onChangeText={setUsername}
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Mot de passe'
+                        secureTextEntry
+                        value={password}
+                        onChangeText={setPassword}
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Confirmer le mot de passe'
+                        secureTextEntry
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                    />
+                </View>
 
-            <View style={styles.buttonView}>
-                <Pressable style={styles.button} onPress={signUp} disabled={loading}>
-                    <Text style={styles.buttonText}>S'INSCRIRE</Text>
-                </Pressable>
-            </View>
+                <View style={styles.buttonContainer}>
+                    <Pressable style={styles.button} onPress={signUp} disabled={loading}>
+                        <Text style={styles.buttonText}>INSCRIPTION</Text>
+                    </Pressable>
+                </View>
 
-            <Text style={styles.footerText}>
-                Already Have an Account?
-                <Pressable onPress={navigateToLogin} disabled={loading}>
-                    <Text style={styles.signup}> Login</Text>
-                </Pressable>
-            </Text>
+                <Text style={styles.footerText}>
+                    Vous avez déjà un compte?{' '}
+                    <Pressable onPress={navigateToLogin} disabled={loading}>
+                        <Text style={styles.loginLink}>Connexion</Text>
+                    </Pressable>
+                </Text>
+            </ScrollView>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        alignItems: "center",
-        paddingTop: 70,
+        flex: 1,
+        backgroundColor: '#fff',
     },
-    image: {
-        height: 120,
-        width: 120
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        paddingVertical: 50,
+        paddingHorizontal: 20,
+    },
+    logo: {
+        width: 150,
+        height: 150,
+        alignSelf: 'center',
+        marginBottom: 30,
     },
     title: {
-        fontSize: 30,
-        fontWeight: "bold",
-        textTransform: "uppercase",
-        textAlign: "center",
-        paddingVertical: 40,
-        color: "red"
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 20,
+        color: '#333',
     },
-    inputView: {
-        gap: 15,
-        width: "100%",
-        paddingHorizontal: 40,
-        marginBottom: 5
+    formContainer: {
+        width: '100%',
+        paddingHorizontal: 20,
+        marginBottom: 20,
     },
     input: {
         height: 50,
         paddingHorizontal: 20,
-        borderColor: "red",
+        borderColor: '#ddd',
         borderWidth: 1,
-        borderRadius: 7
+        borderRadius: 10,
+        marginBottom: 15,
     },
-    rememberView: {
-        width: "100%",
-        paddingHorizontal: 50,
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexDirection: "row",
-        marginBottom: 8
-    },
-    switch: {
-        flexDirection: "row",
-        gap: 1,
-        justifyContent: "center",
-        alignItems: "center"
-    },
-    rememberText: {
-        fontSize: 13
-    },
-    forgetText: {
-        fontSize: 11,
-        color: "red"
+    buttonContainer: {
+        width: '100%',
+        alignItems: 'center',
+        marginBottom: 20,
     },
     button: {
-        backgroundColor: "red",
-        height: 45,
-        borderColor: "gray",
-        borderWidth: 1,
-        borderRadius: 5,
-        alignItems: "center",
-        justifyContent: "center"
+        backgroundColor: '#3498db',
+        height: 50,
+        width: '50%',
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     buttonText: {
-        color: "white",
+        color: '#fff',
         fontSize: 18,
-        fontWeight: "bold"
-    },
-    buttonView: {
-        width: "100%",
-        paddingHorizontal: 50,
-        margin:15,
-    },
-    optionsText: {
-        textAlign: "center",
-        paddingVertical: 10,
-        color: "gray",
-        fontSize: 13,
-        marginBottom: 6
-    },
-    mediaIcons: {
-        flexDirection: "row",
-        gap: 15,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 23
-    },
-    icons: {
-        width: 40,
-        height: 40
+        fontWeight: 'bold',
     },
     footerText: {
-        textAlign: "center",
-        color: "gray" 
+        fontSize: 16,
+        textAlign: 'center',
+        color: '#666',
     },
-    signup: {
-        color: "red",
-        fontSize: 13
-    }
+    loginLink: {
+        color: '#3498db',
+    },
 });
 
 export default SignUp;

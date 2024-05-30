@@ -1,6 +1,6 @@
 //import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -11,11 +11,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Forms from './src/FormsScreen/Forms'; 
 import Form from './src/FormsScreen/Form';
 import Pdf1 from './src/FormsScreen/Pdf1';
-import Page1 from './src/CompletedScreen/Completed';
 import Profil from './src/ProfilScreen/Profil';
 import SignUp from './src/SignUpScreen/SignUp';
 import Login from './src/LoginScreen/Login';
-import PDF from './src/PdfScreen/Pdf'
 
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
@@ -27,8 +25,8 @@ const FormsStack = createStackNavigator();
 function FormsStackScreen() {
   return (
     <FormsStack.Navigator>
-      <FormsStack.Screen name="Forms" component={Forms} />
-      <FormsStack.Screen name="Form" component={Form} />
+      <FormsStack.Screen name="Forms" component={Forms} options={{title: "BON D'INTERVENTION"}} />
+      <FormsStack.Screen name="Form" component={Form} options={{title: "Intervention Cmultiserv"}}/>
       <FormsStack.Screen name="Pdf1" component={Pdf1} />
     </FormsStack.Navigator>
   );
@@ -37,8 +35,8 @@ function FormsStackScreen() {
 function LoginStackScreen() {
   return (
     <FormsStack.Navigator>
-      <FormsStack.Screen name="Login" component={Login} />
-      <FormsStack.Screen name="SignUp" component={SignUp} />
+      <FormsStack.Screen name="Login" component={Login} options={{title: "Connexion"}} />
+      <FormsStack.Screen name="SignUp" component={SignUp}options={{title: "Inscription"}}/>
     </FormsStack.Navigator>
   );
 }
@@ -62,29 +60,30 @@ export default function App() {
 
             if (route.name === 'Forms') {
               iconName = focused
-                ? 'ios-information-circle'
-                : 'ios-information-circle-outline';
-            } 
-            if (route.name === 'Profil') {
-              iconName = focused ? 'ios-list' : 'ios-list-outline';
+                ? require('./assets/form_focus.png')
+                : require('./assets/form.png');
+            } if (route.name === 'Profil') {
+              iconName = focused
+                ? require('./assets/user_focus.png')
+                : require('./assets/user.png');
+            }if (route.name === 'LoginStackScreen') {
+              iconName = focused
+                ? require('./assets/completed_focus.png')
+                : require('./assets/completed.png');
             }
-            if (route.name === 'LoginStackScreen') {
-              iconName = focused ? 'ios-list' : 'ios-list-outline';
-            }
-            if (route.name === 'Pdf') {
-              iconName = focused ? 'ios-list' : 'ios-list-outline';
-            }
+           
+           
 
             // You can return any component that you like here!
-            return <Ionicons name={iconName} size={size} color={color} />;
+            return <Image source={iconName} style = {{width:size, height:size}}/>;
           },
-          tabBarActiveTintColor: 'tomato',
+          tabBarActiveTintColor: '#045084',
           tabBarInactiveTintColor: 'gray',
         })}>
-      <Tab.Screen name="Forms" component={FormsStackScreen} options={{ headerShown: false }}/>
-      <Tab.Screen name="Profil" component={Profil} />
+      <Tab.Screen name="Forms" component={FormsStackScreen} options={{ headerShown: false ,title:"Bon d'Interventions"} } />
       {user ? null : <Tab.Screen name="LoginStackScreen" component={LoginStackScreen}  options={{ headerShown: false }}/>}
-      <Tab.Screen name="Pdf" component={PDF}/>
+      <Tab.Screen name="Profil" component={Profil} />
+      
     </Tab.Navigator>
 </NavigationContainer>
     

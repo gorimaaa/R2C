@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Image, ScrollView, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import ficheMultiserv from './Fiche.jpg'; 
+import ficheR2C from './FicheR2C.jpeg'; 
 
 const Forms = () => {
   const navigation = useNavigation();
@@ -9,29 +11,72 @@ const Forms = () => {
     navigation.navigate('Form'); 
   };
 
+
+
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={navigateToForm} style={styles.formItem}>
-        <Text>Formulaire</Text>
-      </TouchableOpacity>
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.formItemContainer}>
+        <TouchableOpacity onPress={navigateToForm} style={styles.formItem}>
+          <Image 
+            source={ficheMultiserv} 
+            style={styles.image}
+          />
+        </TouchableOpacity>
+        <Text style={styles.itemText}>Intervetion Cmultiserv</Text>
+      </View>
+      <View style={styles.formItemContainer}>
+        <TouchableOpacity onPress={navigateToForm} style={styles.formItem}>
+          <Image 
+            source={ficheR2C} 
+            style={styles.image}
+          />
+        </TouchableOpacity>
+        <Text style={styles.itemText}>Intervention R2C</Text>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#f0f0f0',
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  formItemContainer: {
+    marginBottom: 30,
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 8,
+    alignItems: 'center',
   },
   formItem: {
-    width: '80%',
-    height: 100,
-    backgroundColor: '#e0e0e0',
-    marginBottom: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
+    width: '100%',
+    height: 500,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  itemText: {
+    padding: 15,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
 });
 

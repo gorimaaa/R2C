@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import SignatureScreen from "react-native-signature-canvas";
 import { useNavigation } from "@react-navigation/native";
+
 import {
   View,
   TextInput,
@@ -11,13 +12,12 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-const Form = () => {
+const Form = ({ text, onOK }) => {
   const [num, setNum] = useState("");
   const [date, setDate] = useState("");
   const [heureDebut, setheureDebut] = useState("");
   const [heureFin, setheureFin] = useState("");
   const [deplacement, setDeplacement] = useState("");
-
   const [adresse, setAdresse] = useState("");
   const [typeIntervention, setTypeIntervention] = useState(null);
   const [devis, setDevis] = useState(null);
@@ -30,43 +30,59 @@ const Form = () => {
   const option1 = ["Intervention", "Devis", "Selon devis"];
   const option2 = ["Oui", "Non"];
   const navigation = useNavigation();
-  const handleOptionSelectTypeIntervention = (option) => {
-    setTypeIntervention(option);
-  };
-  const handleOptionSelectDevis = (option) => {
-    setDevis(option);
-  };
-  const question1 = "Type d'intervention";
-  const question2 = "Un devis est-il a suivre ?";
 
-  const signatureRef = useRef(null);
+  const signatureRef = useRef();
+
   const handleSignature = (signature) => {
     setSignature(signature);
+    if (onOK) {
+      onOK(signature);
+    }
+    setSignature(signature);
+    
   };
+
+  const handleEmpty = () => {
+    console.log("Signature vide");
+  };
+
+  const handleClear = () => {
+    console.log("Signature effacée avec succès !");
+  };
+
+  const handleEnd = () => {
+    signatureRef.current.readSignature();
+  };
+
+  const handleData = (data) => {
+    
+  };
+
   const handleClearSignature = () => {
-  
     if (signatureRef.current) {
       signatureRef.current.clearSignature();
       setSignature("");
     }
   };
+
   const handleSubmit = () => {
-    navigation.navigate("Pdf1", {
-      num,
-      date,
-      heureDebut,
-      heureFin,
-      deplacement,
-      adresse,
-      typeIntervention,
-      devis,
-      devisDesc,
-      description,
-      fourniture,
-      nomtech,
-      nomSite,
-      signature
-    });
+    
+     navigation.navigate("Pdf1", {
+       num,
+    //   date,
+    //   heureDebut,
+    //   heureFin,
+    //   deplacement,
+    //   adresse,
+    //   typeIntervention,
+    //   devis,
+    //   devisDesc,
+    //   description,
+    //   fourniture,
+    //   nomtech,
+    //   nomSite,
+    signature,
+     });
   };
 
   return (
@@ -88,7 +104,7 @@ const Form = () => {
           style={styles.input}
           value={heureDebut}
           onChangeText={(text) => setheureDebut(text)}
-          placeholder="Heure d'arrivé"
+          placeholder="Heure d'arrivée"
         />
         <TextInput
           style={styles.input}
@@ -100,7 +116,7 @@ const Form = () => {
           style={styles.input}
           value={deplacement}
           onChangeText={(text) => setDeplacement(text)}
-          placeholder="Nombre de déplacement"
+          placeholder="Nombre de déplacements"
         />
         <TextInput
           style={styles.input}
@@ -108,7 +124,7 @@ const Form = () => {
           onChangeText={(text) => setAdresse(text)}
           placeholder="Adresse d'intervention"
         />
-        <Text style={styles.question}>{question1}</Text>
+        <Text style={styles.question}>Type d'intervention</Text>
         <View style={styles.optionsContainer}>
           {option1.map((option, index) => (
             <Button
@@ -119,7 +135,7 @@ const Form = () => {
             />
           ))}
         </View>
-        <Text style={styles.question}>{question2}</Text>
+        <Text style={styles.question}>Un devis est-il à suivre ?</Text>
         <View style={styles.optionsContainer}>
           {option2.map((option, index) => (
             <Button
@@ -134,7 +150,7 @@ const Form = () => {
           style={styles.descriptionInput}
           value={devisDesc}
           onChangeText={(text) => setDevisDesc(text)}
-          placeholder="(Si un devis est a suivre) Pour quel préstation ?"
+          placeholder="(Si un devis est à suivre) Pour quelle prestation ?"
           multiline={true}
           numberOfLines={4}
         />
@@ -168,7 +184,15 @@ const Form = () => {
         />
         <Text style={styles.signatureLabel}>Signature :</Text>
         <View style={styles.signatureContainer}>
-          <SignatureScreen ref={signatureRef} onOK={handleSignature} />
+          <SignatureScreen
+            ref={signatureRef}
+            onEnd={handleEnd}
+            onOK={handleSignature}
+            onEmpty={handleEmpty}
+            onClear={handleClear}
+            onGetData={handleData}
+            descriptionText={text}
+          />
         </View>
         <Button title="Effacer" onPress={handleClearSignature} />
 
@@ -259,4 +283,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Form;
+export default Form

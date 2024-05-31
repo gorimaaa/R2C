@@ -1,58 +1,68 @@
-/**
- * Copyright (c) 2017-present, Wonday (@wonday.org)
- * All rights reserved.
- *
- * This source code is licensed under the MIT-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-import React from 'react';
-import { StyleSheet, Dimensions, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Dimensions, View, Text } from 'react-native';
 import Pdf from 'react-native-pdf';
+import { useRoute } from '@react-navigation/native';
+import { FIREBASE_STORAGE } from '../../FirebaseConfig';
+import { ref, getDownloadURL } from 'firebase/storage';
 
-export default class PDFExample extends React.Component {
-    render() {
-        //const source = { uri: 'http://samples.leanpub.com/thereactnativebook-sample.pdf', cache: true };
-        const source = require('./Fiche.pdf');  // ios only
-        //const source = {uri:'bundle-assets://test.pdf' };
-        //const source = {uri:'file:///sdcard/test.pdf'};
-        //const source = {uri:"data:application/pdf;base64,JVBERi0xLjcKJc..."};
-        //const source = {uri:"content://com.example.blobs/xxxxxxxx-...?offset=0&size=xxx"};
-        //const source = {uri:"blob:xxxxxxxx-...?offset=0&size=xxx"};
+const PdfScreen = () => {
+  const route = useRoute();
+  const { name } = route.params;
+  const [pdfUrl, setPdfUrl] = useState('');
 
-        return (
-            <View style={styles.container}>
-                <Pdf
-                    trustAllCerts={false}
-                    source={source}
-                    onLoadComplete={(numberOfPages,filePath) => {
-                        console.log(`Number of pages: ${numberOfPages}`);
-                    }}
-                    onPageChanged={(page,numberOfPages) => {
-                        console.log(`Current page: ${page}`);
-                    }}
-                    onError={(error) => {
-                        console.log(error);
-                    }}
-                    onPressLink={(uri) => {
-                        console.log(`Link pressed: ${uri}`);
-                    }}
-                    style={styles.pdf}/>
-            </View>
-        )
-    }
-}
+  useEffect(() => {
+    const fetchPdfUrl = async () => {
+      try {
+        const storageRef = ref(FIREBASE_STORAGE, name);
+        const url = await getDownloadURL(storageRef);
+        setPdfUrl(url);
+      } catch (error) {
+        console.error('Error fetching PDF URL:', error);
+      }
+    };
+
+    fetchPdfUrl();
+  }, [name]);
+
+  return (
+    <View style={styles.container}>
+      {pdfUrl ? (
+        <Pdf
+          trustAllCerts={false}
+          source={{ uri: pdfUrl, cache: true }}
+          onLoadComplete={(numberOfPages, filePath) => {
+            console.log(`Number of pages: ${numberOfPages}`);
+          }}
+          onPageChanged={(page, numberOfPages) => {
+            console.log(`Current page: ${page}`);
+          }}
+          onError={(error) => {
+            console.log(error);
+          }}
+          onPressLink={(uri) => {
+            console.log(`Link pressed: ${uri}`);
+          }}
+          style={styles.pdf}
+        />
+      ) : (
+        <Text>Loading PDF...</Text>
+      )}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        marginTop: 25,
-    },
-    pdf: {
-        flex:1,
-        width:Dimensions.get('window').width,
-        height:Dimensions.get('window').height,
-    }
+  container: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: 25,
+  },
+  pdf: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
 });
+
+export default PdfScreen;

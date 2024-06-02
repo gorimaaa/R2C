@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, Text, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import DocumentPicker from 'react-native-document-picker';
-import { FIREBASE_STORAGE } from '../../FirebaseConfig';
+import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../../FirebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Test = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = FIREBASE_AUTH.onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const pickImage = () => {
     const options = {
@@ -32,25 +45,25 @@ const Test = () => {
 
   const uriToBlob = (uri) => {
     return new Promise((resolve, reject) => {
-       const xhr = new XMLHttpRequest()
-       xhr.onload = function () {
-         // return the blob
-         resolve(xhr.response)
-       }
-       xhr.onerror = function () {
-         reject(new Error('uriToBlob failed'))
-       }
-       xhr.responseType = 'blob'
-       xhr.open('GET', uri, true)
-   
-       xhr.send(null)})}
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new Error('uriToBlob failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+  };
 
   const pickFile = async () => {
     try {
       const result = await DocumentPicker.pickSingle({
         type: [DocumentPicker.types.allFiles],
       });
-      setFile(result); // Update to set the entire selected file object
+      setFile(result);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         console.log('User cancelled file picker');
@@ -68,20 +81,21 @@ const Test = () => {
     }
     setUploading(true);
     try {
-      const filename = file.name;
-      const storageRef = ref(FIREBASE_STORAGE, filename);
+      const timestamp = Date.now();
+      const filename = `file_${timestamp}.pdf`;
+      const storageRef = ref(FIREBASE_STORAGE, 'users/' + user.email + '/' + filename);
 
+      const blob = await uriToBlob(file.uri);
 
-      //const response = await fetch(file.uri);
-      //const blob = await response.blob();
-      console.log(file.name)
-      blob = await uriToBlob(file.uri)
-      
-      await uploadBytes(storageRef, blob);
+      const metadata = {
+        contentType: 'application/pdf',
+        customMetadata: {
+          type: 'r2c',
+          uploadedAt: new Date().toISOString(),
+        },
+      };
 
-
-
-
+      await uploadBytes(storageRef, blob, metadata);
 
       const downloadURL = await getDownloadURL(storageRef);
       setUploading(false);

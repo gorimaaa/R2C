@@ -13,7 +13,7 @@ const PdfScreen = () => {
   useEffect(() => {
     const fetchPdfUrl = async () => {
       try {
-        const storageRef = ref(FIREBASE_STORAGE, name);
+        const storageRef = ref(FIREBASE_STORAGE, 'pdf/' + name);
         const url = await getDownloadURL(storageRef);
         setPdfUrl(url);
       } catch (error) {

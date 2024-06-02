@@ -1,33 +1,64 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, Image, ScrollView, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import ficheMultiserv from './Fiche.jpg'; 
-import ficheR2C from './FicheR2C.jpeg'; 
+
+import { FIREBASE_STORAGE } from '../../FirebaseConfig';
+import { ref, getDownloadURL } from 'firebase/storage';
 
 const Forms = () => {
   const navigation = useNavigation();
+  const [imageUrls, setImageUrls] = useState({ ficheMultiserv: '', ficheR2C: '' });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchImageUrls = async () => {
+      try {
+        const storageRef1 = ref(FIREBASE_STORAGE, 'img/Fiche.jpg');
+        const storageRef2 = ref(FIREBASE_STORAGE, 'img/FicheR2C.jpeg');
+        const url1 = await getDownloadURL(storageRef1);
+        const url2 = await getDownloadURL(storageRef2);
+        setImageUrls({ ficheMultiserv: url1, ficheR2C: url2 });
+      } catch (error) {
+        console.error('Error fetching image URLs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchImageUrls();
+  }, []);
 
   const navigateToForm = () => {
     navigation.navigate('Form'); 
   };
 
+  const navigateToFormR2C = () => {
+    navigation.navigate('FormR2C'); 
+  };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.formItemContainer}>
         <TouchableOpacity onPress={navigateToForm} style={styles.formItem}>
           <Image 
-            source={ficheMultiserv} 
+            source={{ uri: imageUrls.ficheMultiserv }} 
             style={styles.image}
           />
         </TouchableOpacity>
-        <Text style={styles.itemText}>Intervetion Cmultiserv</Text>
+        <Text style={styles.itemText}>Intervention Cmultiserv</Text>
       </View>
       <View style={styles.formItemContainer}>
-        <TouchableOpacity onPress={navigateToForm} style={styles.formItem}>
+        <TouchableOpacity onPress={navigateToFormR2C} style={styles.formItem}>
           <Image 
-            source={ficheR2C} 
+            source={{ uri: imageUrls.ficheR2C }} 
             style={styles.image}
           />
         </TouchableOpacity>
@@ -77,6 +108,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

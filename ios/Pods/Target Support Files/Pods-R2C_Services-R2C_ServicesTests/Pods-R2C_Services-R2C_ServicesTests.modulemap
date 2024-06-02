@@ -1,0 +1,6 @@
+module Pods_R2C_Services_R2C_ServicesTests {
+  umbrella header "Pods-R2C_Services-R2C_ServicesTests-umbrella.h"
+
+  export *
+  module * { export * }
+}

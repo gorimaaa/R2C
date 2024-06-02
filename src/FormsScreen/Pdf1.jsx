@@ -6,6 +6,8 @@ import RNHTMLtoPDF from "react-native-html-to-pdf";
 import FileViewer from "react-native-file-viewer";
 import { Alert } from "react-native";
 import { useRoute } from "@react-navigation/native";
+import { FIREBASE_STORAGE } from '../../FirebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Pdf1 = () => {
   const route = useRoute();
@@ -758,6 +760,22 @@ pdf2htmlEX.defaultViewer = new pdf2htmlEX.Viewer({});
       createPDF();
     }
   };
+
+  const uriToBlob = (uri) => {
+    return new Promise((resolve, reject) => {
+       const xhr = new XMLHttpRequest()
+       xhr.onload = function () {
+         // return the blob
+         resolve(xhr.response)
+       }
+       xhr.onerror = function () {
+         reject(new Error('uriToBlob failed'))
+       }
+       xhr.responseType = 'blob'
+       xhr.open('GET', uri, true)
+   
+       xhr.send(null)})}
+
   const createPDF = async () => {
     let options = {
       //Content to print
@@ -773,9 +791,14 @@ pdf2htmlEX.defaultViewer = new pdf2htmlEX.Viewer({});
 
       base64: true,
     };
-
     let file = await RNHTMLtoPDF.convert(options);
-    // console.log(file.filePath);
+    console.log("FilePath : " + file.filePath)
+    const storageRef = ref(FIREBASE_STORAGE, "pdf/test.pdf");
+    blob = await uriToBlob(file.filePath)
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    //console.log("downloadurl" + downloadURL);
     Alert.alert(
       "Exporter avec succès",
       "" /*file.filePath*/,

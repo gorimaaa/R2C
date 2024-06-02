@@ -9,6 +9,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
   const navigation = useNavigation();
   const auth = FIREBASE_AUTH;
 
@@ -50,7 +51,12 @@ const Login = () => {
             <View style={[styles.checkbox, rememberMe && styles.checkedCheckbox]} />
             <Text style={styles.rememberMeText}>Se souvenir de moi</Text>
           </Pressable>
-          <Pressable style={styles.loginButton} onPress={handleSignIn}>
+          <Pressable
+            style={[styles.loginButton, isPressed && styles.loginButtonPressed]}
+            onPressIn={() => setIsPressed(true)}
+            onPressOut={() => setIsPressed(false)}
+            onPress={handleSignIn}
+          >
             <Text style={styles.buttonText}>CONNEXION</Text>
           </Pressable>
         </View>
@@ -62,7 +68,6 @@ const Login = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -123,6 +128,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
   },
+  loginButtonPressed: {
+    backgroundColor: '#2980b9', 
+  },
   buttonText: {
     color: '#fff',
     fontSize: 18,
@@ -135,6 +143,9 @@ const styles = StyleSheet.create({
   signUpText: {
     color: '#3498db', 
     textDecorationLine: 'underline',
+  },
+  loginButtonPressed: {
+    backgroundColor: '#2980b9', 
   },
 });
 

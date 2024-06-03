@@ -29,11 +29,13 @@ const Forms = () => {
   }, []);
 
   const navigateToForm = () => {
-    navigation.navigate('Form'); 
+    name = 'multiserv';
+    navigation.navigate('Form', {name});
   };
 
   const navigateToFormR2C = () => {
-    navigation.navigate('FormR2C'); 
+    name = 'r2c';
+    navigation.navigate('FormR2C' , { name }); 
   };
 
   if (loading) {

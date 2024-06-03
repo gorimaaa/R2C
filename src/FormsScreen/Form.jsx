@@ -1,9 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef,useEffect } from "react";
 import SignatureScreen from "react-native-signature-canvas";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import RNHTMLtoPDF from "react-native-html-to-pdf";
 import FileViewer from "react-native-file-viewer";
 import { Alert } from "react-native";
+
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../../FirebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import {
   View,
@@ -17,7 +21,8 @@ import {
 
 const Form = ({ text,textClient, onOK, onOKClient }) => {
   const [num, setNum] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [heureDebut, setheureDebut] = useState("");
   const [heureFin, setheureFin] = useState("");
   const [deplacement, setDeplacement] = useState("");
@@ -35,6 +40,21 @@ const Form = ({ text,textClient, onOK, onOKClient }) => {
   const option1 = ["Intervention", "Devis", "Selon devis"];
   const option2 = ["Oui", "Non"];
   const navigation = useNavigation();
+  const [user, setUser] = useState(null);
+  const route = useRoute();
+  const { name } = route.params;
+
+  useEffect(() => {
+    const unsubscribe = FIREBASE_AUTH.onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
   const handleOptionSelectTypeIntervention = (option) => {
     setTypeIntervention(option);
   };
@@ -923,11 +943,13 @@ const Form = ({ text,textClient, onOK, onOKClient }) => {
     }
   };
   const createPDF = async () => {
+    const timestamp = Date.now();
+    const fn = `file_${timestamp}.pdf`;
     let options = {
       //Content to print
       html: htmlContent,
       //File Name
-      fileName: "my-test",
+      fileName: fn,
       //File directory
       directory: "Download",
 
@@ -939,6 +961,30 @@ const Form = ({ text,textClient, onOK, onOKClient }) => {
     };
 
     let file = await RNHTMLtoPDF.convert(options);
+    try {
+    
+      
+      const storageRef = ref(FIREBASE_STORAGE, 'users/' + user.email + '/' + fn);
+
+      const blob = await uriToBlob(file.filePath);
+
+      const metadata = {
+        contentType: 'application/pdf',
+        customMetadata: {
+          type: name,
+          uploadedAt: new Date().toISOString(),
+        },
+      };
+
+      await uploadBytes(storageRef, blob, metadata);
+
+      const downloadURL = await getDownloadURL(storageRef);
+  
+    } catch (e) {
+      console.log('Erreur lors du téléchargement du fichier: ', e);
+      Alert.alert('Erreur', `Une erreur est survenue lors du téléchargement du fichier: ${e.message}`);
+    }
+
     // console.log(file.filePath);
     Alert.alert(
       "Exporter avec succès",
@@ -961,6 +1007,21 @@ const Form = ({ text,textClient, onOK, onOKClient }) => {
       });
   };
 
+  const uriToBlob = (uri) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new Error('uriToBlob failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+  };
+  
   const handleSignature = (signature) => {
     setSignature(signature);
     if (onOK) {
@@ -1020,7 +1081,18 @@ const Form = ({ text,textClient, onOK, onOKClient }) => {
       setSignatureClient("");
     }
   };
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
 
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleDateConfirm = (selectedDate) => {
+    setDate(selectedDate);
+    hideDatePicker();
+  };
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -1030,11 +1102,14 @@ const Form = ({ text,textClient, onOK, onOKClient }) => {
           onChangeText={(text) => setNum(text)}
           placeholder="N° d'intervention"
         />
-        <TextInput
-          style={styles.input}
-          value={date}
-          onChangeText={(text) => setDate(text)}
-          placeholder="Date d'intervention"
+        <TouchableOpacity style={styles.input} onPress={showDatePicker}>
+          <Text>{date.toLocaleDateString()}</Text>
+        </TouchableOpacity>
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleDateConfirm}
+          onCancel={hideDatePicker}
         />
         <TextInput
           style={styles.input}

@@ -10,10 +10,15 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+import FileViewer from "react-native-file-viewer";
+import { Alert } from "react-native";
 
 const FormR2C = ({ text, onOK}) => {
   const [num, setNum] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [technicien1, setTechnicien1] = useState("");
   const [technicien2, setTechnicien2] = useState("");
   const [ordre, setOrdre] = useState("");
@@ -26,6 +31,9 @@ const FormR2C = ({ text, onOK}) => {
   const [description, setDescription] = useState("");
   const [deplacement, setDeplacement] = useState("");
   const [prixDeplacement, setPrixDeplacement] = useState("");
+  const [prixMD, setPrixMD] = useState("");
+  const [heureMD, setHeureMD] = useState("");
+  const [tva, setTVA] = useState("");
   const [fourniture, setFourniture] = useState("");
   const [heureDebut, setHeureDebut] = useState("");
   const [heureFin, setHeureFin] = useState("");
@@ -33,7 +41,10 @@ const FormR2C = ({ text, onOK}) => {
   const option1 = ["Dépanage", "Entretien", "Travaux"];
   const option2 = ["Contrat", "Devis", "Facture"];
   const option3 = ["Demandée", "Réalisée"];
+  const option4 = ["10%", "20%"];
   const navigation = useNavigation();
+
+  const htmlContent = ``;
 
   const handleOptionSelectTypeIntervention = (option) => {
     setTypeIntervention(option);
@@ -43,6 +54,10 @@ const FormR2C = ({ text, onOK}) => {
   };
   const handleOptionSelectPresation = (option) => {
     setPrestation(option);
+  };
+
+  const handleOptionSelectTVA = (option) => {
+    setTVA(option);
   };
 
   const handleSignature = (signature) => {
@@ -76,6 +91,84 @@ const FormR2C = ({ text, onOK}) => {
     }
   };
 
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleDateConfirm = (selectedDate) => {
+    setDate(selectedDate);
+    hideDatePicker();
+  };
+
+  const askPermission = () => {
+    async function requestExternalWritePermission() {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: "Pdf creator needs External Storage Write Permission",
+            message: "Pdf creator needs access to Storage data in your SD Card",
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          createPDF();
+        } else {
+          alert("WRITE_EXTERNAL_STORAGE permission denied");
+        }
+      } catch (err) {
+        alert("Write permission err", err);
+        console.warn(err);
+      }
+    }
+    if (Platform.OS === "android") {
+      requestExternalWritePermission();
+    } else {
+      createPDF();
+    }
+  };
+  const createPDF = async () => {
+    let options = {
+      //Content to print
+      html: htmlContent,
+      //File Name
+      fileName: "my-test",
+      //File directory
+      directory: "Download",
+
+      base64: true,
+
+      width: 595.28,
+
+      height: 841.89,
+    };
+
+    let file = await RNHTMLtoPDF.convert(options);
+    // console.log(file.filePath);
+    Alert.alert(
+      "Exporter avec succès",
+      "" /*file.filePath*/,
+      [
+        { text: "Annuler", style: "cancel" },
+        { text: "Ouvrir", onPress: () => openFile(file.filePath) },
+      ],
+      { cancelable: true }
+    );
+  };
+  const openFile = (filepath) => {
+    const path = filepath; // absolute-path-to-my-local-file.
+    FileViewer.open(path)
+      .then(() => {
+        // success
+      })
+      .catch((error) => {
+        // error
+      });
+  };
+
   const handleSubmit = () => {};
 
   return (
@@ -87,11 +180,14 @@ const FormR2C = ({ text, onOK}) => {
           onChangeText={(text) => setNum(text)}
           placeholder="N° d'intervention"
         />
-        <TextInput
-          style={styles.input}
-          value={date}
-          onChangeText={(text) => setDate(text)}
-          placeholder="Date d'intervention"
+        <TouchableOpacity style={styles.input} onPress={showDatePicker}>
+          <Text>{date.toLocaleDateString()}</Text>
+        </TouchableOpacity>
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleDateConfirm}
+          onCancel={hideDatePicker}
         />
         <TextInput
           style={styles.input}
@@ -153,7 +249,7 @@ const FormR2C = ({ text, onOK}) => {
           onChangeText={(text) => setAdresseFacturation(text)}
           placeholder="Adresse de facturation (si differente)"
         />
-         <Text style={styles.question}>Préstation :</Text>
+        <Text style={styles.question}>Préstation :</Text>
         <View style={styles.optionsContainer}>
           {option3.map((option, index) => (
             <Button
@@ -164,7 +260,7 @@ const FormR2C = ({ text, onOK}) => {
             />
           ))}
         </View>
-        <Text style={styles.question}>Description</Text>
+    
         <TextInput
           style={styles.descriptionInput}
           value={description}
@@ -182,18 +278,49 @@ const FormR2C = ({ text, onOK}) => {
           numberOfLines={4}
         />
         <Text style={styles.question}>Déplacement :</Text>
-        <TextInput
-          style={styles.input}
-          value={deplacement}
-          onChangeText={(text) => setDeplacement(text)}
-          placeholder="Nombre de déplacment"
-        />
-        <TextInput
-          style={styles.input}
-          value={prixDeplacement}
-          onChangeText={(text) => setPrixDeplacement(text)}
-          placeholder="Prix déplacement"
-        />
+        <View style={styles.rowContainer}>
+          <TextInput
+            style={[styles.input, styles.halfInput]}
+            value={deplacement}
+            onChangeText={(text) => setDeplacement(text)}
+            placeholder="Nombre"
+          />
+          <TextInput
+            style={[styles.input, styles.halfInput]}
+            value={prixDeplacement}
+            onChangeText={(text) => setPrixDeplacement(text)}
+            placeholder="Prix"
+          />
+        </View>
+
+        <Text style={styles.question}>Main d'oeuvre :</Text>
+        <View style={styles.rowContainer}>
+          <TextInput
+            style={[styles.input, styles.halfInput]}
+            value={heureMD}
+            onChangeText={(text) => setHeureMD(text)}
+            placeholder="Heure"
+          />
+          <TextInput
+            style={[styles.input, styles.halfInput]}
+            value={prixMD}
+            onChangeText={(text) => setPrixMD(text)}
+            placeholder="Prix"
+          />
+        </View>
+
+        <Text style={styles.question}>TVA :</Text>
+        <View style={styles.optionsContainer}>
+          {option4.map((option, index) => (
+            <Button
+              key={index}
+              title={option}
+              onPress={() => handleOptionSelectTVA(option)}
+              color={tva === option ? "green" : "gray"}
+            />
+          ))}
+        </View>
+
         <TextInput
           style={styles.input}
           value={heureDebut}
@@ -220,7 +347,7 @@ const FormR2C = ({ text, onOK}) => {
         </View>
         <Button title="Effacer" onPress={handleClearSignature} />
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <TouchableOpacity style={styles.submitButton} onPress={askPermission}>
           <Text style={styles.submitButtonText}>Soumettre</Text>
         </TouchableOpacity>
       </View>
@@ -285,6 +412,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 20,
   },
+  rowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 20,
+  },
+  halfInput: {
+    width: "48%", // Adjust width to have some space between inputs
+  },
   signatureLabel: {
     fontSize: 18,
     marginBottom: 10,
@@ -296,7 +432,7 @@ const styles = StyleSheet.create({
     borderColor: "#000",
   },
   submitButton: {
-    marginBottom:50,
+    marginBottom: 50,
     backgroundColor: "green",
     padding: 10,
     borderRadius: 5,

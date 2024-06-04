@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, Text, StyleSheet, Dimensions, TouchableOpacity, FlatList } from 'react-native';
+import { View, Image, Text, StyleSheet, TextInput, Dimensions, TouchableOpacity, FlatList } from 'react-native';
 import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../../FirebaseConfig';
 import { ref, listAll, getDownloadURL, getMetadata } from 'firebase/storage';
 import { useNavigation } from '@react-navigation/native';
@@ -13,6 +13,7 @@ const MyForms = () => {
   const [sortBy, setSortBy] = useState('recent'); // State pour le type de tri : 'recent' ou 'old'
   const [visible, setVisible] = useState(false); // State pour la visibilité du menu déroulant
   const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(''); // State pour la barre de recherche
 
   const fetchPdfPreviews = async (user) => {
     try {
@@ -35,12 +36,11 @@ const MyForms = () => {
         return { multiserv_img, r2c_img, name: itemRef.name, createdAt, type: metadata.customMetadata?.type || 'unknown', };
       }));
 
-      // Filtrer les prévisualisations en fonction des filtres sélectionnés
+      // Filtrer les prévisualisations en fonction des filtres sélectionnés et de la recherche
       let filteredPreviews = previews.filter(preview => {
-        if (filters.length === 0 || filters.includes(preview.type)) {
-          return true;
-        }
-        return false;
+        const matchesFilters = filters.length === 0 || filters.includes(preview.type);
+        const matchesSearch = preview.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesFilters && matchesSearch;
       });
 
       // Tri des prévisualisations par date de création
@@ -85,7 +85,7 @@ const MyForms = () => {
       // Nettoyer l'intervalle lors du démontage du composant
       return () => clearInterval(interval);
     }
-  }, [user, filters, sortBy]);
+  }, [user, filters, sortBy, searchQuery]);
 
   const navigation = useNavigation();
 
@@ -132,7 +132,7 @@ const MyForms = () => {
           style={styles.pdfPreviewImage}
           resizeMode="contain"
         />
-        <Text style={styles.pdfPreviewInfo}>{(item.type === 'r2c') ? "Intervention R2C" : "Intervention Multiserv"}</Text>
+        <Text style={styles.pdfPreviewInfo}>{(item.type === 'r2c') ? "Intervention R2C" : "Intervention CMultiserv"}</Text>
         <Text style={styles.pdfPreviewDate}>Fait le {formatDate(item.createdAt)}</Text>
       </TouchableOpacity>
     );
@@ -141,6 +141,14 @@ const MyForms = () => {
   return (
     <Provider>
       <View style={styles.container}>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Rechercher..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
         <Menu
           visible={visible}
           onDismiss={handleMenuClose}
@@ -191,10 +199,22 @@ const MenuAnchor = ({ handlePress }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f0f0f0',
+    padding: 0,
+    backgroundColor: '#ffffff',
+  },
+  searchContainer: {
+    padding :20,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingLeft: 15,
+    backgroundColor: '#f9f9f9',
   },
   pdfListContainer: {
+    padding :5,
     flexGrow: 1,
     justifyContent: 'center',
     paddingBottom: 20,
@@ -209,8 +229,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
     elevation: 8,
     alignItems: 'center',
     padding: 10,
@@ -222,12 +242,12 @@ const styles = StyleSheet.create({
   },
   pdfPreviewImage: {
     width: '100%',
-    height: 150,
+    height: 200,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
   pdfPreviewInfo: {
-    marginTop: 10,
+    marginTop: 5,
     fontSize: 16,
     textAlign: 'center',
     color: '#333',
@@ -242,15 +262,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     paddingHorizontal: 15,
-    borderRadius: 5,
-    backgroundColor: '#2196f3',
+    borderRadius: 20,
+    backgroundColor: '#3498db',
     alignItems: 'center',
-    width: '30%', // Ajustez la largeur si nécessaire
+    width: '40%', // Ajustez la largeur si nécessaire
     marginBottom: 20,
+    justifyContent: 'center',
+    alignSelf: 'center'
   },
   menuText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
     marginLeft: 5,
   },
   selectedFiltersContainer: {
@@ -262,10 +284,11 @@ const styles = StyleSheet.create({
   },
   selectedFilter: {
     flexDirection: 'row',
-    backgroundColor: '#2196f3',
+    backgroundColor: '#4CAF50',
     padding: 5,
     margin: 5,
     alignItems: 'center',
+    borderRadius: 20,
   },
   selectedFilterText: {
     color: '#fff',
@@ -278,7 +301,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   removeFilterText: {
-    color: '#2196f3',
+    color: '#4CAF50',
     fontSize: 12,
   },
   noFilesText: {

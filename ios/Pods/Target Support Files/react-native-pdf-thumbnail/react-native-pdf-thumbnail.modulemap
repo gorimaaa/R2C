@@ -1,6 +1,0 @@
-module react_native_pdf_thumbnail {
-  umbrella header "react-native-pdf-thumbnail-umbrella.h"
-
-  export *
-  module * { export * }
-}

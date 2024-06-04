@@ -1,1 +1,0 @@
-../../../../../node_modules/react-native-pdf-thumbnail/ios/PdfThumbnail-Bridging-Header.h

@@ -1,1 +1,0 @@
-../../../Target Support Files/react-native-pdf-thumbnail/react-native-pdf-thumbnail-umbrella.h

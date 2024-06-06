@@ -17,6 +17,8 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  PermissionsAndroid, // Importer PermissionsAndroid
+  Platform,
 } from "react-native";
 
 const Form = ({ text,textClient, onOK, onOKClient }) => {
@@ -916,32 +918,35 @@ const Form = ({ text,textClient, onOK, onOKClient }) => {
   </html>
   
       `;
-  const askPermission = () => {
-    async function requestExternalWritePermission() {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: "Pdf creator needs External Storage Write Permission",
-            message: "Pdf creator needs access to Storage data in your SD Card",
+      const askPermission = async () => {
+        if (Platform.OS === 'android') {
+          try {
+            const granted = await PermissionsAndroid.request(
+              PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+              {
+                title: "Accès au stockage externe nécessaire",
+                message: "Cette application a besoin d'accéder au stockage pour enregistrer le fichier PDF.",
+                buttonNeutral: "Demander plus tard",
+                buttonNegative: "Annuler",
+                buttonPositive: "OK"
+              }
+            );
+    
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+              createPDF();
+            } else {
+              Alert.alert("Permission refusée", "Vous devez autoriser l'accès au stockage pour pouvoir enregistrer le fichier PDF.");
+            }
+          } catch (err) {
+            console.warn(err);
           }
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          createPDF();
         } else {
-          alert("WRITE_EXTERNAL_STORAGE permission denied");
+          createPDF();
         }
-      } catch (err) {
-        alert("Write permission err", err);
-        console.warn(err);
-      }
-    }
-    if (Platform.OS === "android") {
-      requestExternalWritePermission();
-    } else {
-      createPDF();
-    }
-  };
+      };
+
+
+
   const createPDF = async () => {
     const timestamp = Date.now();
     const fn = `file_${timestamp}.pdf`;
@@ -973,6 +978,7 @@ const Form = ({ text,textClient, onOK, onOKClient }) => {
         customMetadata: {
           type: name,
           uploadedAt: new Date().toISOString(),
+          num : num,
         },
       };
 

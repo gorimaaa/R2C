@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Alert, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FirebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { collection, setDoc, getDoc, doc } from "firebase/firestore";
 
 import { useNavigation } from '@react-navigation/native';
@@ -33,6 +33,9 @@ const CreateUser = () => {
             setLoading(true);
             console.log('Starting user creation process');
             
+            // Save the current user
+            const currentUser = FIREBASE_AUTH.currentUser;
+
             const response = await createUserWithEmailAndPassword(FIREBASE_AUTH, username, password);
             const uid = response.user.uid; // Get the user ID
             console.log('User created with UID:', uid);
@@ -50,10 +53,16 @@ const CreateUser = () => {
             await setDoc(userDoc, userData); // Add user data to Firestore with UID as document ID
             console.log('User data added to Firestore with UID as document ID');
 
+            // Sign out the newly created user
+            await signOut(FIREBASE_AUTH);
+
+            // Restore the previous user session
+            if (currentUser) {
+                await FIREBASE_AUTH.updateCurrentUser(currentUser);
+                console.log('Restored previous user session');
+            }
+
             Alert.alert('Compte créé avec succès');
-            
-            // Retrieve and display user role
-            await getUserRole(uid);
 
         } catch (error) {
             console.error('Error during user creation:', error);
@@ -61,21 +70,6 @@ const CreateUser = () => {
         } finally {
             setLoading(false); // Set loading state back to false after completion (both success and failure)
             console.log('User creation process finished');
-        }
-    };
-
-    const getUserRole = async (uid) => {
-        try {
-            const userDoc = doc(FIREBASE_DB, 'users', uid); // Access the user's document in Firestore
-            const userSnapshot = await getDoc(userDoc);
-            if (userSnapshot.exists()) {
-                const userData = userSnapshot.data();
-                Alert.alert(`Le rôle de l'utilisateur est : ${userData.role}`);
-            } else {
-                Alert.alert('Utilisateur non trouvé');
-            }
-        } catch (error) {
-            Alert.alert('Erreur lors de la récupération du rôle de l\'utilisateur ' + error.message);
         }
     };
 

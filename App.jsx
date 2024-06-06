@@ -13,12 +13,36 @@ import Login from './src/LoginScreen/Login';
 import PDF from './src/PdfScreen/Pdf';
 import Test from './src/TestScreen/Test';
 import MyForms from './src/MyFormsScreen/MyForms';
+import CreateUser from './src/AdminScreen/CreateUser';
+import ChangeUserInfo from './src/AdminScreen/ChangeUserInfo';
+import EditUserInfo from './src/AdminScreen/EditUserInfo';
+import UsersForms from './src/AdminScreen/UsersForms';
+
 
 import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 
 const Tab = createBottomTabNavigator();
 const FormsStack = createStackNavigator();
+
+
+function UserInfoStackScreen() {
+  return (
+    <FormsStack.Navigator>
+      <FormsStack.Screen name="ChangeUserInfo" component={ChangeUserInfo} />
+      <FormsStack.Screen name="EditUserInfo" component={EditUserInfo} />
+    </FormsStack.Navigator>
+  );
+}
+
+function UsersFormsStackScreen(){
+  return(
+    <FormsStack.Navigator>
+      <FormsStack.Screen name="UsersForms" component={UsersForms} />
+      <FormsStack.Screen name="Pdf" component={PDF} />
+    </FormsStack.Navigator>
+  )
+}
 
 function FormsStackScreen() {
   return (
@@ -85,6 +109,14 @@ export default function App() {
                 iconName = focused ? 'ios-list' : 'ios-list-outline';
               } else if (route.name === 'MyFormsStackScreen') {
                 iconName = focused ? 'ios-list' : 'ios-list-outline';
+              } else if (route.name === 'AdminPanel') {
+                iconName = focused ? 'ios-list' : 'ios-list-outline';
+              } else if (route.name === 'CreateUser') {
+                iconName = focused ? 'ios-list' : 'ios-list-outline';
+              }else if (route.name === 'UserInfoStackScreen') {
+                iconName = focused ? 'ios-list' : 'ios-list-outline';
+              }else if (route.name === 'UsersFormsStackScreen') {
+                iconName = focused ? 'ios-list' : 'ios-list-outline';
               }
 
               return <Ionicons name={iconName} size={size} color={color} />;
@@ -93,10 +125,12 @@ export default function App() {
             tabBarInactiveTintColor: 'gray',
           })}
         >
-          <Tab.Screen name="Forms" component={FormsStackScreen} options={{ headerShown: false }} />
+          <Tab.Screen name="CreateUser" component={CreateUser} />
+          <Tab.Screen name = "UserInfoStackScreen" component={UserInfoStackScreen} options={{ headerShown: false, title: "Infos utilisateur" }}/>
+          <Tab.Screen name = "UsersFormsStackScreen" component={UsersFormsStackScreen} options={{ headerShown: false, title: "Formulaires d'utilisateurs" }}/>
+
           <Tab.Screen name="Profil" component={Profil} />
-          <Tab.Screen name="Test" component={Test} />
-          <Tab.Screen name="MyFormsStackScreen" component={MyFormsStackScreen} options={{ headerShown: false }} />
+          
         </Tab.Navigator>
       ) : (
         <LoginStackScreen />

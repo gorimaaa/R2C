@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Image, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Image, Text, StyleSheet, Dimensions, TouchableOpacity, FlatList } from 'react-native';
 import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../../FirebaseConfig';
 import { ref, listAll, getDownloadURL, getMetadata } from 'firebase/storage';
 import { useNavigation } from '@react-navigation/native';
@@ -14,9 +14,57 @@ const MyForms = () => {
   const [visible, setVisible] = useState(false); // State pour la visibilité du menu déroulant
   const [user, setUser] = useState(null);
 
+  const fetchPdfPreviews = async (user) => {
+    try {
+      const storageRef = ref(FIREBASE_STORAGE, 'users/' + user.email + '/');
+      const storageRef1 = ref(FIREBASE_STORAGE, 'img/Fiche.jpg');
+      const storageRef2 = ref(FIREBASE_STORAGE, 'img/FicheR2C.jpeg');
+      const multiserv_img = await getDownloadURL(storageRef1);
+      const r2c_img = await getDownloadURL(storageRef2);
+      const result = await listAll(storageRef);
+
+      const previews = await Promise.all(result.items.map(async (itemRef) => {
+        const downloadURL = await getDownloadURL(itemRef);
+        const metadata = await getMetadata(itemRef);
+
+        let createdAt;
+        if (metadata.timeCreated) {
+          createdAt = new Date(metadata.timeCreated);
+        }
+
+        return { multiserv_img, r2c_img, name: itemRef.name, createdAt, type: metadata.customMetadata?.type || 'unknown', };
+      }));
+
+      // Filtrer les prévisualisations en fonction des filtres sélectionnés
+      let filteredPreviews = previews.filter(preview => {
+        if (filters.length === 0 || filters.includes(preview.type)) {
+          return true;
+        }
+        return false;
+      });
+
+      // Tri des prévisualisations par date de création
+      filteredPreviews = filteredPreviews.sort((a, b) => {
+        if (sortBy === 'recent') {
+          return b.createdAt - a.createdAt; // Plus récent en premier
+        } else {
+          return a.createdAt - b.createdAt; // Plus ancien en premier
+        }
+      });
+
+      // Ajouter un élément factice si le nombre est impair
+      if (filteredPreviews.length % 2 !== 0) {
+        filteredPreviews.push({ name: 'placeholder', isPlaceholder: true });
+      }
+
+      setPdfPreviews(filteredPreviews);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des URL PDF :', error);
+    }
+  };
 
   useEffect(() => {
-    FIREBASE_AUTH.onAuthStateChanged((user) => {
+    const unsubscribe = FIREBASE_AUTH.onAuthStateChanged((user) => {
       if (user) {
         setUser(user);
       } else {
@@ -24,59 +72,20 @@ const MyForms = () => {
       }
     });
 
-    const fetchPdfPreviews = async () => {
-      try {
-        const storageRef = ref(FIREBASE_STORAGE, 'users/' + user.email + '/');
-        const storageRef1 = ref(FIREBASE_STORAGE, 'img/Fiche.jpg');
-        const storageRef2 = ref(FIREBASE_STORAGE, 'img/FicheR2C.jpeg');
-        const multiserv_img = await getDownloadURL(storageRef1);
-        const r2c_img = await getDownloadURL(storageRef2);
-        const result = await listAll(storageRef);
+    return () => unsubscribe();
+  }, []);
 
-        const previews = await Promise.all(result.items.map(async (itemRef) => {
-          const downloadURL = await getDownloadURL(itemRef);
-          const metadata = await getMetadata(itemRef);
+  useEffect(() => {
+    if (user) {
+      fetchPdfPreviews(user);
 
-          let createdAt;
-          if (metadata.timeCreated) {
-            createdAt = new Date(metadata.timeCreated);
-          }
+      // Vérifier périodiquement toutes les 5 secondes (5000 ms)
+      const interval = setInterval(() => fetchPdfPreviews(user), 5000); // 5 secondes
 
-          return { multiserv_img, r2c_img, name: itemRef.name, createdAt, type: metadata.customMetadata?.type || 'unknown', };
-        }));
-
-        // Filtrer les prévisualisations en fonction des filtres sélectionnés
-        let filteredPreviews = previews.filter(preview => {
-          if (filters.length === 0 || filters.includes(preview.type)) {
-            return true;
-          }
-          return false;
-        });
-
-        // Tri des prévisualisations par date de création
-        filteredPreviews = filteredPreviews.sort((a, b) => {
-          if (sortBy === 'recent') {
-            return b.createdAt - a.createdAt; // Plus récent en premier
-          } else {
-            return a.createdAt - b.createdAt; // Plus ancien en premier
-          }
-        });
-
-        setPdfPreviews(filteredPreviews);
-      } catch (error) {
-        console.error('Error fetching PDF URLs: ', error);
-      }
-    };
-
-    // Effectuer une première récupération
-    fetchPdfPreviews();
-
-    // Vérifier périodiquement toutes les 5 secondes (5000 ms)
-    const interval = setInterval(fetchPdfPreviews, 5000); // 5 secondes
-
-    // Nettoyer l'intervalle lors du démontage du composant
-    return () => clearInterval(interval);
-  }, [filters, sortBy]); // Déclenche le fetchPdfPreviews lorsque filters ou sortBy changent
+      // Nettoyer l'intervalle lors du démontage du composant
+      return () => clearInterval(interval);
+    }
+  }, [user, filters, sortBy]);
 
   const navigation = useNavigation();
 
@@ -111,6 +120,24 @@ const MyForms = () => {
     setVisible(false); // Cacher le menu après sélection du tri
   };
 
+  const renderItem = ({ item }) => {
+    if (item.isPlaceholder) {
+      return <View style={[styles.pdfPreviewContainer, styles.placeholderContainer]} />;
+    }
+
+    return (
+      <TouchableOpacity onPress={() => navigateToForm(item.name)} style={styles.pdfPreviewContainer}>
+        <Image
+          source={{ uri: (item.type === 'r2c') ? item.r2c_img : item.multiserv_img }}
+          style={styles.pdfPreviewImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.pdfPreviewInfo}>{(item.type === 'r2c') ? "Intervention R2C" : "Intervention Multiserv"}</Text>
+        <Text style={styles.pdfPreviewDate}>Fait le {formatDate(item.createdAt)}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <Provider>
       <View style={styles.container}>
@@ -141,24 +168,15 @@ const MyForms = () => {
         </View>
 
         {/* Liste des prévisualisations filtrées et triées */}
-        <ScrollView contentContainerStyle={styles.pdfListContainer}>
-          {pdfPreviews.length === 0 ? (
-            <Text style={styles.noFilesText}>Aucun fichier trouvé</Text>
-          ) : (
-            pdfPreviews.map((preview, index) => (
-              <TouchableOpacity key={index} onPress={() => navigateToForm(preview.name)} style={styles.pdfPreviewContainer}>
-                {console.log(user.email)}
-                <Image
-                  source={{ uri: (preview.type === 'r2c') ? preview.r2c_img : preview.multiserv_img }}
-                  style={styles.pdfPreviewImage}
-                  resizeMode="contain"
-                />
-                <Text style={styles.pdfPreviewInfo}>{preview.name}</Text>
-                <Text style={styles.pdfPreviewDate}>Fait le {formatDate(preview.createdAt)}</Text>
-              </TouchableOpacity>
-            ))
-          )}
-        </ScrollView>
+        <FlatList
+          data={pdfPreviews}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.name}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
+          contentContainerStyle={styles.pdfListContainer}
+          ListEmptyComponent={<Text style={styles.noFilesText}>Aucun fichier trouvé</Text>}
+        />
       </View>
     </Provider>
   );
@@ -178,11 +196,15 @@ const styles = StyleSheet.create({
   },
   pdfListContainer: {
     flexGrow: 1,
-    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 20,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
   },
   pdfPreviewContainer: {
-    marginBottom: 20,
-    width: Dimensions.get('window').width * 0.9,
+    flex: 1,
+    margin: 10,
     backgroundColor: '#fff',
     borderRadius: 12,
     shadowColor: '#000',
@@ -191,15 +213,24 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 8,
     alignItems: 'center',
+    padding: 10,
+  },
+  placeholderContainer: {
+    backgroundColor: 'transparent',
+    shadowColor: 'transparent',
+    elevation: 0,
   },
   pdfPreviewImage: {
     width: '100%',
-    height: 200,
+    height: 150,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
   pdfPreviewInfo: {
     marginTop: 10,
     fontSize: 16,
     textAlign: 'center',
+    color: '#333',
   },
   pdfPreviewDate: {
     marginTop: 5,
@@ -214,7 +245,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#2196f3',
     alignItems: 'center',
-    width: '20%', // Largeur du bouton
+    width: '30%', // Ajustez la largeur si nécessaire
     marginBottom: 20,
   },
   menuText: {

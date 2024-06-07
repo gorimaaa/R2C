@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import SignatureScreen from "react-native-signature-canvas";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   View,
   TextInput,
@@ -14,6 +14,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import RNHTMLtoPDF from "react-native-html-to-pdf";
 import FileViewer from "react-native-file-viewer";
 import { Alert } from "react-native";
+import { FIREBASE_STORAGE, FIREBASE_AUTH } from "../../FirebaseConfig";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const FormR2C = ({ text, onOK}) => {
   const [num, setNum] = useState("");
@@ -39,13 +41,30 @@ const FormR2C = ({ text, onOK}) => {
   const [heureDebut, setHeureDebut] = useState("");
   const [heureFin, setHeureFin] = useState("");
   const [signature, setSignature] = useState("");
+  const [user, setUser] = useState(null);
+
   const option1 = ["Dépanage", "Entretien", "Travaux"];
   const option2 = ["Contrat", "Devis", "Facture"];
   const option3 = ["Demandée", "Réalisée"];
   const option4 = ["10%", "20%"];
   const navigation = useNavigation();
+  const route = useRoute();
+  const { name } = route.params;
 
-  const htmlContent = `<!DOCTYPE html>
+  useEffect(() => {
+    const unsubscribe = FIREBASE_AUTH.onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const htmlContent = `
+  <!DOCTYPE html>
   <!-- Created by pdf2htmlEX (https://github.com/pdf2htmlEX/pdf2htmlEX) -->
   <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -613,12 +632,15 @@ const FormR2C = ({ text, onOK}) => {
       createPDF();
     }
   };
+
   const createPDF = async () => {
+    const timestamp = Date.now();
+    const fn = `file_${timestamp}.pdf`;
     let options = {
       //Content to print
       html: htmlContent,
       //File Name
-      fileName: "my-test",
+      fileName: fn,
       //File directory
       directory: "Download",
 
@@ -630,6 +652,32 @@ const FormR2C = ({ text, onOK}) => {
     };
 
     let file = await RNHTMLtoPDF.convert(options);
+    try {
+      const storageRef = ref(
+        FIREBASE_STORAGE,
+        "users/" + user.email + "/" + fn
+      );
+      const blob = await uriToBlob(file.filePath);
+      const metadata = {
+        contentType: "application/pdf",
+        customMetadata: {
+          type: name,
+          uploadedAt: new Date().toISOString(),
+          num: num,
+        },
+      };
+
+      await uploadBytes(storageRef, blob, metadata);
+
+      const downloadURL = await getDownloadURL(storageRef);
+    } catch (e) {
+      console.log("Erreur lors du téléchargement du fichier: ", e);
+      Alert.alert(
+        "Erreur",
+        `Une erreur est survenue lors du téléchargement du fichier: ${e.message}`
+      );
+    }
+
     // console.log(file.filePath);
     Alert.alert(
       "Exporter avec succès",
@@ -641,6 +689,22 @@ const FormR2C = ({ text, onOK}) => {
       { cancelable: true }
     );
   };
+
+  const uriToBlob = (uri) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new Error("uriToBlob failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+  };
+
   const openFile = (filepath) => {
     const path = filepath; // absolute-path-to-my-local-file.
     FileViewer.open(path)

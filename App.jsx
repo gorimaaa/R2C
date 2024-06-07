@@ -22,6 +22,7 @@ import CreateUser from './src/AdminScreen/CreateUser';
 import ChangeUserInfo from './src/AdminScreen/ChangeUserInfo';
 import EditUserInfo from './src/AdminScreen/EditUserInfo';
 import UsersForms from './src/AdminScreen/UsersForms';
+import AdminPdf from './src/AdminScreen/AdminPdf';
 
 const Tab = createBottomTabNavigator();
 const FormsStack = createStackNavigator();
@@ -68,7 +69,7 @@ function UsersFormsStackScreen(){
   return(
     <FormsStack.Navigator>
       <FormsStack.Screen name="UsersForms" component={UsersForms} />
-      <FormsStack.Screen name="Pdf" component={PDF} />
+      <FormsStack.Screen name="AdminPdf" component={AdminPdf} />
     </FormsStack.Navigator>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, Text, StyleSheet, TextInput, Dimensions, TouchableOpacity, FlatList } from 'react-native';
-import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../../FirebaseConfig';
+import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { FIREBASE_STORAGE } from '../../FirebaseConfig';
 import { ref, listAll, getDownloadURL, getMetadata } from 'firebase/storage';
 import { useNavigation } from '@react-navigation/native';
 import { Menu, Divider, Provider } from 'react-native-paper';
@@ -9,10 +9,10 @@ const fiche = require("../../assets/logo.png");
 
 const UsersForms = () => {
   const [pdfPreviews, setPdfPreviews] = useState([]);
-  const [filters, setFilters] = useState([]); // State pour les filtres sélectionnés
-  const [sortBy, setSortBy] = useState('recent'); // State pour le type de tri : 'recent' ou 'old'
-  const [visible, setVisible] = useState(false); // State pour la visibilité du menu déroulant
-  const [searchQuery, setSearchQuery] = useState(''); // State pour la barre de recherche
+  const [filters, setFilters] = useState([]);
+  const [sortBy, setSortBy] = useState('recent');
+  const [visible, setVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchPdfPreviews = async () => {
     try {
@@ -37,29 +37,33 @@ const UsersForms = () => {
             createdAt = new Date(metadata.timeCreated);
           }
 
-          return { multiserv_img, r2c_img, name: itemRef.name, createdAt, type: metadata.customMetadata?.type || 'unknown' };
+          return {
+            multiserv_img,
+            r2c_img,
+            name: itemRef.name,
+            createdAt,
+            num: metadata.customMetadata?.num || 'unknown', // Add num metadata
+            type: metadata.customMetadata?.type || 'unknown'
+          };
         }));
 
         allPreviews = [...allPreviews, ...previews];
       }
 
-      // Filtrer les prévisualisations en fonction des filtres sélectionnés et de la recherche
       let filteredPreviews = allPreviews.filter(preview => {
         const matchesFilters = filters.length === 0 || filters.includes(preview.type);
-        const matchesSearch = preview.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = preview.num.includes(searchQuery); // Search by num
         return matchesFilters && matchesSearch;
       });
 
-      // Tri des prévisualisations par date de création
       filteredPreviews = filteredPreviews.sort((a, b) => {
         if (sortBy === 'recent') {
-          return b.createdAt - a.createdAt; // Plus récent en premier
+          return b.createdAt - a.createdAt;
         } else {
-          return a.createdAt - b.createdAt; // Plus ancien en premier
+          return a.createdAt - b.createdAt;
         }
       });
 
-      // Ajouter un élément factice si le nombre est impair
       if (filteredPreviews.length % 2 !== 0) {
         filteredPreviews.push({ name: 'placeholder', isPlaceholder: true });
       }
@@ -72,18 +76,14 @@ const UsersForms = () => {
 
   useEffect(() => {
     fetchPdfPreviews();
-
-    // Vérifier périodiquement toutes les 5 secondes (5000 ms)
-    const interval = setInterval(() => fetchPdfPreviews(), 5000); // 5 secondes
-
-    // Nettoyer l'intervalle lors du démontage du composant
+    const interval = setInterval(() => fetchPdfPreviews(), 5000);
     return () => clearInterval(interval);
   }, [filters, sortBy, searchQuery]);
 
   const navigation = useNavigation();
 
   const navigateToForm = (name) => {
-    navigation.navigate('Pdf', { name });
+    navigation.navigate('AdminPdf', { name });
   };
 
   const formatDate = (date) => {
@@ -99,10 +99,8 @@ const UsersForms = () => {
 
   const handleFilter = (type) => {
     if (filters.includes(type)) {
-      // Si le filtre est déjà sélectionné, le retirer
       setFilters(filters.filter(item => item !== type));
     } else {
-      // Sinon, l'ajouter
       setFilters([...filters, type]);
     }
     setVisible(false);
@@ -110,7 +108,7 @@ const UsersForms = () => {
 
   const handleSortBy = (type) => {
     setSortBy(type);
-    setVisible(false); // Cacher le menu après sélection du tri
+    setVisible(false);
   };
 
   const renderItem = ({ item }) => {
@@ -137,7 +135,7 @@ const UsersForms = () => {
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Rechercher..."
+            placeholder="Rechercher par numéro..."
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -156,7 +154,6 @@ const UsersForms = () => {
           <Menu.Item onPress={() => handleSortBy('old')} title="Plus anciens" />
         </Menu>
 
-        {/* Affichage des filtres sélectionnés */}
         <View style={styles.selectedFiltersContainer}>
           {filters.map((filter, index) => (
             <TouchableOpacity key={index} style={styles.selectedFilter}>
@@ -168,7 +165,6 @@ const UsersForms = () => {
           ))}
         </View>
 
-        {/* Liste des prévisualisations filtrées et triées */}
         <FlatList
           data={pdfPreviews}
           renderItem={renderItem}
@@ -258,7 +254,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#3498db',
     alignItems: 'center',
-    width: '40%', // Ajustez la largeur si nécessaire
+    width: '40%',
     marginBottom: 20,
     justifyContent: 'center',
     alignSelf: 'center'

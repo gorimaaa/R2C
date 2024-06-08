@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { FIREBASE_STORAGE } from '../../FirebaseConfig';
 import { ref, listAll, getDownloadURL, getMetadata } from 'firebase/storage';
 import { useNavigation } from '@react-navigation/native';
@@ -7,14 +7,22 @@ import { Menu, Divider, Provider } from 'react-native-paper';
 
 const fiche = require("../../assets/logo.png");
 
+
 const UsersForms = () => {
   const [pdfPreviews, setPdfPreviews] = useState([]);
   const [filters, setFilters] = useState([]);
   const [sortBy, setSortBy] = useState('recent');
   const [visible, setVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const fetchPdfPreviews = async () => {
+
+  const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
+  const fetchPdfPreviews = async (loadDisplay) => {
+    setLoading(loadDisplay);
     try {
       const usersRef = ref(FIREBASE_STORAGE, 'users/');
       const storageRef1 = ref(FIREBASE_STORAGE, 'img/Fiche.jpg');
@@ -42,7 +50,7 @@ const UsersForms = () => {
             r2c_img,
             name: itemRef.name,
             createdAt,
-            num: metadata.customMetadata?.num || 'unknown', // Add num metadata
+            num: metadata.customMetadata?.num || 'unknown',
             type: metadata.customMetadata?.type || 'unknown'
           };
         }));
@@ -52,7 +60,7 @@ const UsersForms = () => {
 
       let filteredPreviews = allPreviews.filter(preview => {
         const matchesFilters = filters.length === 0 || filters.includes(preview.type);
-        const matchesSearch = preview.num.includes(searchQuery); // Search by num
+        const matchesSearch = searchQuery === '' || preview.num.includes(searchQuery);
         return matchesFilters && matchesSearch;
       });
 
@@ -71,14 +79,18 @@ const UsersForms = () => {
       setPdfPreviews(filteredPreviews);
     } catch (error) {
       console.error('Erreur lors de la récupération des URL PDF :', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPdfPreviews();
-    const interval = setInterval(() => fetchPdfPreviews(), 5000);
+    fetchPdfPreviews(true);
+    const interval = setInterval(() => fetchPdfPreviews(false), 30000);
     return () => clearInterval(interval);
   }, [filters, sortBy, searchQuery]);
+
+  
 
   const navigation = useNavigation();
 
@@ -123,7 +135,7 @@ const UsersForms = () => {
           style={styles.pdfPreviewImage}
           resizeMode="contain"
         />
-        <Text style={styles.pdfPreviewInfo}>{(item.type === 'r2c') ? "Intervention R2C" : "Intervention CMultiserv"}</Text>
+        <Text style={styles.pdfPreviewInfo}>{item.num}{/*(item.type === 'r2c') ? "Intervention R2C" : "Intervention CMultiserv"*/}</Text>
         <Text style={styles.pdfPreviewDate}>Fait le {formatDate(item.createdAt)}</Text>
       </TouchableOpacity>
     );
@@ -163,17 +175,24 @@ const UsersForms = () => {
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
+          
         </View>
 
-        <FlatList
-          data={pdfPreviews}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.name}
-          numColumns={2}
-          columnWrapperStyle={styles.columnWrapper}
-          contentContainerStyle={styles.pdfListContainer}
-          ListEmptyComponent={<Text style={styles.noFilesText}>Aucun fichier trouvé</Text>}
-        />
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#045084" />
+          </View>
+        ) : (
+          <FlatList
+            data={pdfPreviews}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.name}
+            numColumns={2}
+            columnWrapperStyle={styles.columnWrapper}
+            contentContainerStyle={styles.pdfListContainer}
+            ListEmptyComponent={<Text style={styles.noFilesText}>Aucun fichier trouvé</Text>}
+          />
+        )}
       </View>
     </Provider>
   );
@@ -298,6 +317,11 @@ const styles = StyleSheet.create({
     color: 'grey',
     textAlign: 'center',
     marginTop: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

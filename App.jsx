@@ -23,6 +23,7 @@ import ChangeUserInfo from './src/AdminScreen/ChangeUserInfo';
 import EditUserInfo from './src/AdminScreen/EditUserInfo';
 import UsersForms from './src/AdminScreen/UsersForms';
 import AdminPdf from './src/AdminScreen/AdminPdf';
+import More from './src/AdminScreen/More';
 
 const Tab = createBottomTabNavigator();
 const FormsStack = createStackNavigator();
@@ -72,6 +73,16 @@ function UsersFormsStackScreen(){
       <FormsStack.Screen name="AdminPdf" component={AdminPdf} />
     </FormsStack.Navigator>
   )
+}
+
+function MoreStackScreen() {
+  return (
+    <FormsStack.Navigator>
+      <Tab.Screen name="More" component={More} />
+      <Tab.Screen name="CreateUser" component={CreateUser} />
+      <Tab.Screen name = "UserInfoStackScreen" component={UserInfoStackScreen} options={{ headerShown: false, title: "Infos utilisateur" }}/>
+    </FormsStack.Navigator>
+  );
 }
 
 export default function App() {
@@ -134,7 +145,7 @@ export default function App() {
                   iconName = focused
                     ? require('./assets/completed_focus.png')
                     : require('./assets/completed.png');
-                } else if (route.name === 'Profil') {
+                } else if (route.name === 'MoreStackScreen') {
                   iconName = focused
                     ? require('./assets/completed_focus.png')
                     : require('./assets/completed.png');
@@ -146,10 +157,9 @@ export default function App() {
               tabBarInactiveTintColor: 'gray',
             })}
           >
-          <Tab.Screen name="CreateUser" component={CreateUser} />
-          <Tab.Screen name = "UserInfoStackScreen" component={UserInfoStackScreen} options={{ headerShown: false, title: "Infos utilisateur" }}/>
           <Tab.Screen name = "UsersFormsStackScreen" component={UsersFormsStackScreen} options={{ headerShown: false, title: "Formulaires d'utilisateurs" }}/>
-          <Tab.Screen name="Profil" component={Profil} />
+          <Tab.Screen name = "MoreStackScreen" component={MoreStackScreen} options={{ headerShown: false, title: "More" }}/>
+
           </Tab.Navigator>
         ) : (
           <Tab.Navigator

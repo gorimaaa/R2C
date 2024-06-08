@@ -1,3 +1,5 @@
-Compte admin : 
-adminadmin@admin.fr
-adminadmin
+
+
+
+
+Faire page more avec userinfo, createuser.

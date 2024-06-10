@@ -69,8 +69,8 @@ function UserInfoStackScreen() {
 function UsersFormsStackScreen(){
   return(
     <FormsStack.Navigator>
-      <FormsStack.Screen name="UsersForms" component={UsersForms} />
-      <FormsStack.Screen name="AdminPdf" component={AdminPdf} />
+      <FormsStack.Screen name="UsersForms" component={UsersForms} options={{title: "Bon D'interventions"}} />
+      <FormsStack.Screen name="AdminPdf" component={AdminPdf} options={{title: "Intervention"}}/>
     </FormsStack.Navigator>
   )
 }
@@ -78,9 +78,9 @@ function UsersFormsStackScreen(){
 function MoreStackScreen() {
   return (
     <FormsStack.Navigator>
-      <Tab.Screen name="More" component={More} />
+      <Tab.Screen name="More" component={More} options={{title: "Options"}}/>
       <Tab.Screen name="CreateUser" component={CreateUser} />
-      <Tab.Screen name = "UserInfoStackScreen" component={UserInfoStackScreen} options={{ headerShown: false, title: "Infos utilisateur" }}/>
+      <Tab.Screen name = "UserInfoStackScreen" component={UserInfoStackScreen} options={{ headerShown: false, title: "Bon D'interventions" }}/>
     </FormsStack.Navigator>
   );
 }
@@ -147,8 +147,8 @@ export default function App() {
                     : require('./assets/completed.png');
                 } else if (route.name === 'MoreStackScreen') {
                   iconName = focused
-                    ? require('./assets/completed_focus.png')
-                    : require('./assets/completed.png');
+                    ? require('./assets/menu_focus.png')
+                    : require('./assets/menu.png');
                 }
 
                 return <Image source={iconName} style={{ width: size, height: size }} />;
@@ -157,8 +157,8 @@ export default function App() {
               tabBarInactiveTintColor: 'gray',
             })}
           >
-          <Tab.Screen name = "UsersFormsStackScreen" component={UsersFormsStackScreen} options={{ headerShown: false, title: "Formulaires d'utilisateurs" }}/>
-          <Tab.Screen name = "MoreStackScreen" component={MoreStackScreen} options={{ headerShown: false, title: "More" }}/>
+          <Tab.Screen name = "UsersFormsStackScreen" component={UsersFormsStackScreen} options={{ headerShown: false, title: "Bon D'interventions" }}/>
+          <Tab.Screen name = "MoreStackScreen" component={MoreStackScreen} options={{ headerShown: false, title: "Options" }}/>
 
           </Tab.Navigator>
         ) : (

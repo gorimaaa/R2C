@@ -1,17 +1,19 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 
 const More = () => {
-  const handleLogout = () => {
-    FIREBASE_AUTH.signOut();
-  };
-
   const navigation = useNavigation();
 
-  const navigateToForm = (name) => {
-    navigation.navigate('AdminPdf', { name });
+  const handleLogout = () => {
+    FIREBASE_AUTH.signOut()
+      .then(() => {
+        navigation.navigate('Login');
+      })
+      .catch(error => {
+        console.error(error);
+      });
   };
 
   const handleCreateUser = () => {
@@ -23,17 +25,23 @@ const More = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.link} onPress={handleCreateUser}>
-        <Text style={styles.linkText}>Créer un utilisateur</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Options</Text>
+      </View>
+      <TouchableOpacity style={styles.option} onPress={handleCreateUser}>
+        <Text style={styles.optionText}>Créer un utilisateur</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.link} onPress={handleChangeUserInfo}>
-        <Text style={styles.linkText}>Gérer les utilisateurs</Text>
+      <TouchableOpacity style={styles.option} onPress={handleChangeUserInfo}>
+        <Text style={styles.optionText}>Gérer les utilisateurs</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Déconnexion</Text>
+      <TouchableOpacity style={[styles.option, styles.logoutButton]} onPress={handleLogout}>
+        <Text style={[styles.optionText, styles.logoutButtonText]}>Déconnexion</Text>
       </TouchableOpacity>
-    </View>
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Version: 1.0.0</Text>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -43,44 +51,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    justifyContent: 'center',
+  },
+  header: {
     padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
-  link: {
-    backgroundColor: '#3498db',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 10,
-    marginBottom: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
-  },
-  linkText: {
-    color: '#fff',
-    fontSize: 18,
+  headerText: {
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
+  },
+  option: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  optionText: {
+    fontSize: 18,
+    color: '#333',
   },
   logoutButton: {
-    backgroundColor: '#e74c3c',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
+
   },
   logoutButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#007BFF', // White text for the logout button
+  },
+  footer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#aaa',
   },
 });

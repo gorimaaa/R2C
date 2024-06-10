@@ -60,8 +60,8 @@ function MyFormsStackScreen() {
 function UserInfoStackScreen() {
   return (
     <FormsStack.Navigator>
-      <FormsStack.Screen name="ChangeUserInfo" component={ChangeUserInfo} />
-      <FormsStack.Screen name="EditUserInfo" component={EditUserInfo} />
+      <FormsStack.Screen name="ChangeUserInfo" component={ChangeUserInfo} options={{ headerShown: true, title: "Comptes" }} />
+      <FormsStack.Screen name="EditUserInfo" component={EditUserInfo} options={{ headerShown: true, title: "Modifiée comptes" }}/>
     </FormsStack.Navigator>
   );
 }
@@ -79,7 +79,7 @@ function MoreStackScreen() {
   return (
     <FormsStack.Navigator>
       <Tab.Screen name="More" component={More} options={{title: "Options"}}/>
-      <Tab.Screen name="CreateUser" component={CreateUser} />
+      <Tab.Screen name="CreateUser" component={CreateUser} options={{ headerShown: true, title: "Créer un Utilisateur" }}/>
       <Tab.Screen name = "UserInfoStackScreen" component={UserInfoStackScreen} options={{ headerShown: false, title: "Bon D'interventions" }}/>
     </FormsStack.Navigator>
   );

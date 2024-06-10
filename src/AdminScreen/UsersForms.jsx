@@ -7,7 +7,6 @@ import { Menu, Divider, Provider } from 'react-native-paper';
 
 const fiche = require("../../assets/logo.png");
 
-
 const UsersForms = () => {
   const [pdfPreviews, setPdfPreviews] = useState([]);
   const [filters, setFilters] = useState([]);
@@ -15,11 +14,6 @@ const UsersForms = () => {
   const [visible, setVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-
-
-  const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  };
 
   const fetchPdfPreviews = async (loadDisplay) => {
     setLoading(loadDisplay);
@@ -90,8 +84,6 @@ const UsersForms = () => {
     return () => clearInterval(interval);
   }, [filters, sortBy, searchQuery]);
 
-  
-
   const navigation = useNavigation();
 
   const navigateToForm = (name) => {
@@ -135,7 +127,7 @@ const UsersForms = () => {
           style={styles.pdfPreviewImage}
           resizeMode="contain"
         />
-        <Text style={styles.pdfPreviewInfo}>{item.num}{/*(item.type === 'r2c') ? "Intervention R2C" : "Intervention CMultiserv"*/}</Text>
+        <Text style={styles.pdfPreviewInfo}>{item.num}</Text>
         <Text style={styles.pdfPreviewDate}>Fait le {formatDate(item.createdAt)}</Text>
       </TouchableOpacity>
     );
@@ -144,27 +136,29 @@ const UsersForms = () => {
   return (
     <Provider>
       <View style={styles.container}>
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Rechercher par numéro..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
+        <View style={styles.header}>
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Rechercher par numéro..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+          <Menu
+            visible={visible}
+            onDismiss={handleMenuClose}
+            anchor={<MenuAnchor handlePress={() => setVisible(true)} />}
+          >
+            <Menu.Item onPress={() => handleFilter('r2c')} title="Fichiers R2C" />
+            <Divider />
+            <Menu.Item onPress={() => handleFilter('multiserv')} title="Fichiers Multiserv" />
+            <Divider />
+            <Menu.Item onPress={() => handleSortBy('recent')} title="Plus récents" />
+            <Divider />
+            <Menu.Item onPress={() => handleSortBy('old')} title="Plus anciens" />
+          </Menu>
         </View>
-        <Menu
-          visible={visible}
-          onDismiss={handleMenuClose}
-          anchor={<MenuAnchor handlePress={() => setVisible(true)} />}
-        >
-          <Menu.Item onPress={() => handleFilter('r2c')} title="Fichiers R2C" />
-          <Divider />
-          <Menu.Item onPress={() => handleFilter('multiserv')} title="Fichiers Multiserv" />
-          <Divider />
-          <Menu.Item onPress={() => handleSortBy('recent')} title="Plus récents" />
-          <Divider />
-          <Menu.Item onPress={() => handleSortBy('old')} title="Plus anciens" />
-        </Menu>
 
         <View style={styles.selectedFiltersContainer}>
           {filters.map((filter, index) => (
@@ -175,7 +169,6 @@ const UsersForms = () => {
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
-          
         </View>
 
         {loading ? (
@@ -199,130 +192,134 @@ const UsersForms = () => {
 };
 
 const MenuAnchor = ({ handlePress }) => (
-  <TouchableOpacity onPress={handlePress} style={styles.menuAnchor}>
-    <Text style={styles.menuText}>Filtrer</Text>
-  </TouchableOpacity>
-);
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 0,
-    backgroundColor: '#ffffff',
-  },
-  searchContainer: {
-    padding: 20,
-  },
-  searchInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingLeft: 15,
-    backgroundColor: '#f9f9f9',
-  },
-  pdfListContainer: {
-    padding: 5,
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 20,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
-  },
-  pdfPreviewContainer: {
-    flex: 1,
-    margin: 10,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 8,
-    alignItems: 'center',
-    padding: 10,
-  },
-  placeholderContainer: {
-    backgroundColor: 'transparent',
-    shadowColor: 'transparent',
-    elevation: 0,
-  },
-  pdfPreviewImage: {
-    width: '100%',
-    height: 200,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  pdfPreviewInfo: {
-    marginTop: 5,
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#333',
-  },
-  pdfPreviewDate: {
-    marginTop: 5,
-    fontSize: 14,
-    textAlign: 'center',
-    color: 'grey',
-  },
-  menuAnchor: {
-    flexDirection: 'row',
-    padding: 10,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-    backgroundColor: '#3498db',
-    alignItems: 'center',
-    width: '40%',
-    marginBottom: 20,
-    justifyContent: 'center',
-    alignSelf: 'center'
-  },
-  menuText: {
-    color: '#fff',
-    fontSize: 16,
-    marginLeft: 5,
-  },
-  selectedFiltersContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectedFilter: {
-    flexDirection: 'row',
-    backgroundColor: '#4CAF50',
-    padding: 5,
-    margin: 5,
-    alignItems: 'center',
-    borderRadius: 20,
-  },
-  selectedFilterText: {
-    color: '#fff',
-    marginRight: 5,
-  },
-  removeFilterButton: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 5,
-    marginLeft: 5,
-  },
-  removeFilterText: {
-    color: '#4CAF50',
-    fontSize: 12,
-  },
-  noFilesText: {
-    fontSize: 18,
-    color: 'grey',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
-
-export default UsersForms;
+    <TouchableOpacity onPress={handlePress} style={styles.menuAnchor}>
+      <Text style={styles.menuText}>Filtrer</Text>
+    </TouchableOpacity>
+  );
+  
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#ffffff',
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 20,
+    },
+    searchContainer: {
+      flex: 1,
+    },
+    searchInput: {
+      height: 40,
+      borderColor: '#ccc',
+      borderWidth: 1,
+      borderRadius: 20,
+      paddingLeft: 15,
+      backgroundColor: '#f9f9f9',
+    },
+    selectedFiltersContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginBottom: 10,
+      paddingLeft:10,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    selectedFilter: {
+      flexDirection: 'row',
+      backgroundColor: '#4CAF50',
+      padding: 5,
+      margin: 5,
+      alignItems: 'center',
+      borderRadius: 20,
+    },
+    selectedFilterText: {
+      color: '#fff',
+      marginRight: 5,
+    },
+    removeFilterButton: {
+      backgroundColor: '#fff',
+      borderRadius: 10,
+      padding: 5,
+      marginLeft: 5,
+    },
+    removeFilterText: {
+      color: '#4CAF50',
+      fontSize: 12,
+    },
+    pdfListContainer: {
+      padding: 5,
+      flexGrow: 1,
+      justifyContent: 'center',
+      paddingBottom: 20,
+    },
+    columnWrapper: {
+      justifyContent: 'space-between',
+    },
+    pdfPreviewContainer: {
+      flex: 1,
+      margin: 10,
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 5,
+      elevation: 8,
+      alignItems: 'center',
+      padding: 10,
+    },
+    placeholderContainer: {
+      backgroundColor: 'transparent',
+      shadowColor: 'transparent',
+      elevation: 0,
+    },
+    pdfPreviewImage: {
+      width: '100%',
+      height: 200,
+      borderTopLeftRadius: 12,
+      borderTopRightRadius: 12,
+    },
+    pdfPreviewInfo: {
+      marginTop: 5,
+      fontSize: 16,
+      textAlign: 'center',
+      color: '#333',
+    },
+    pdfPreviewDate: {
+      marginTop: 5,
+      fontSize: 14,
+      textAlign: 'center',
+      color: 'grey',
+    },
+    menuAnchor: {
+      flexDirection: 'row',
+      padding: 10,
+      paddingHorizontal: 15,
+      borderRadius: 20,
+      backgroundColor: '#3498db',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    menuText: {
+      color: '#fff',
+      fontSize: 16,
+      marginLeft: 5,
+    },
+    noFilesText: {
+      fontSize: 18,
+      color: 'grey',
+      textAlign: 'center',
+      marginTop: 20,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  });
+  
+  export default UsersForms;
+  

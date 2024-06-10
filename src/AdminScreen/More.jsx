@@ -1,14 +1,13 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { NavigationProp } from '@react-navigation/native';
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { useNavigation } from '@react-navigation/native';
-
+import { FIREBASE_AUTH } from '../../FirebaseConfig';
 
 const More = () => {
   const handleLogout = () => {
     FIREBASE_AUTH.signOut();
   };
+
   const navigation = useNavigation();
 
   const navigateToForm = (name) => {
@@ -17,12 +16,10 @@ const More = () => {
 
   const handleCreateUser = () => {
     navigation.navigate('CreateUser');
-  
   };
 
   const handleChangeUserInfo = () => {
     navigation.navigate('UserInfoStackScreen');
-
   };
 
   return (
@@ -46,8 +43,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
   },
   link: {
     backgroundColor: '#3498db',
@@ -55,23 +52,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 10,
     marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   linkText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
   },
   logoutButton: {
     backgroundColor: '#e74c3c',
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   logoutButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
   },
 });

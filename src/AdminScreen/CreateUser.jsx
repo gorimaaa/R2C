@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { collection, setDoc, getDoc, doc } from "firebase/firestore";
-
 import { useNavigation } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Menu, Divider, Provider } from 'react-native-paper';
@@ -83,7 +82,7 @@ const CreateUser = () => {
                         <View style={styles.inputView}>
                             <TextInput
                                 style={styles.input}
-                                placeholder='NOM'
+                                placeholder='Nom'
                                 value={lastname}
                                 onChangeText={setLastname}
                                 autoCorrect={false}
@@ -91,7 +90,7 @@ const CreateUser = () => {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder='PRENOM'
+                                placeholder='Prénom'
                                 value={firstname}
                                 onChangeText={setFirstname}
                                 autoCorrect={false}
@@ -99,7 +98,7 @@ const CreateUser = () => {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder='EMAIL'
+                                placeholder='Email'
                                 value={username}
                                 onChangeText={setUsername}
                                 autoCorrect={false}
@@ -107,7 +106,7 @@ const CreateUser = () => {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder='PASSWORD'
+                                placeholder='Mot de passe'
                                 secureTextEntry
                                 value={password}
                                 onChangeText={setPassword}
@@ -116,7 +115,7 @@ const CreateUser = () => {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder='CONFIRM PASSWORD'
+                                placeholder='Confirmer le mot de passe'
                                 secureTextEntry
                                 autoCorrect={false}
                                 autoCapitalize='none'
@@ -154,47 +153,49 @@ const CreateUser = () => {
 
 const styles = StyleSheet.create({
     container: {
-        alignItems: "center",
-        paddingTop: 70,
+        flex: 1,
+        backgroundColor: "#fff",
     },
     scrollViewContent: {
         flexGrow: 1,
+        justifyContent: "center",
     },
     image: {
-        height: 120,
-        width: 120
+        width: 150,
+        height: 150,
+        alignSelf: "center",
+        marginBottom: 30,
     },
     title: {
-        fontSize: 30,
+        fontSize: 24,
         fontWeight: "bold",
-        textTransform: "uppercase",
         textAlign: "center",
-        paddingVertical: 40,
-        color: "red"
+        marginBottom: 20,
+        color: "#333",
     },
     inputView: {
-        gap: 15,
         width: "100%",
-        paddingHorizontal: 40,
-        marginBottom: 5
+        paddingHorizontal: 20,
+        marginBottom: 20,
     },
     input: {
         height: 50,
         paddingHorizontal: 20,
-        borderColor: "red",
+        borderColor: "#ddd",
         borderWidth: 1,
-        borderRadius: 7,
+        borderRadius: 10,
+        marginBottom: 15,
     },
     menuView: {
         width: "100%",
-        paddingHorizontal: 40,
+        paddingHorizontal: 20,
         marginBottom: 20,
         alignItems: "center"
     },
     menuAnchor: {
-        borderColor: "red",
+        borderColor: "#ddd",
         borderWidth: 1,
-        borderRadius: 7,
+        borderRadius: 10,
         padding: 15,
         width: "100%",
         alignItems: 'center',
@@ -202,19 +203,18 @@ const styles = StyleSheet.create({
     },
     menuText: {
         fontSize: 16,
-        color: 'red'
+        color: '#333'
     },
     buttonView: {
         width: "100%",
-        paddingHorizontal: 50,
-        margin: 15,
+        alignItems: "center",
+        marginBottom: 20,
     },
     button: {
-        backgroundColor: "red",
-        height: 45,
-        borderColor: "gray",
-        borderWidth: 1,
-        borderRadius: 5,
+        backgroundColor: "#3498db",
+        height: 50,
+        width: "50%",
+        borderRadius: 10,
         alignItems: "center",
         justifyContent: "center"
     },

@@ -61,22 +61,24 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        backgroundColor: "#fff",
     },
     userContainer: {
         padding: 15,
         marginVertical: 5,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#fff',
         borderColor: '#ddd',
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 10,
     },
     username: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: "#333",
     },
     lastname: {
         fontSize: 14,
-        color: '#555',
+        color: '#666',
     },
 });
 

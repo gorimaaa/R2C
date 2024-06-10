@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Dimensions, View, Text } from 'react-native';
+import { StyleSheet, Dimensions, View, Text, Button, Alert } from 'react-native';
 import Pdf from 'react-native-pdf';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../../FirebaseConfig';
-import { ref, getDownloadURL, listAll } from 'firebase/storage';
+import { ref, getDownloadURL, listAll, deleteObject } from 'firebase/storage';
 
 const AdminPdf = () => {
   const route = useRoute();
+  const navigation = useNavigation();
   const { name } = route.params;
   const [pdfUrl, setPdfUrl] = useState('');
   const [user, setUser] = useState(null);
@@ -49,26 +50,51 @@ const AdminPdf = () => {
     fetchPdfUrl();
   }, [name, user]); // Add user as a dependency
 
+  const handleDelete = async () => {
+    if (user) {
+      try {
+        const usersRef = ref(FIREBASE_STORAGE, 'users/');
+        const userFolders = await listAll(usersRef);
+
+        for (const folderRef of userFolders.prefixes) {
+          const fileRef = ref(FIREBASE_STORAGE, `${folderRef.fullPath}/${name}`);
+          try {
+            await deleteObject(fileRef);
+            Alert.alert('Fichier supprimé avec succès');
+            setPdfUrl('');  // Réinitialiser l'URL du PDF
+            navigation.goBack(); // Retour après suppression
+            break; // Exit loop once the file is found and deleted
+          } catch (error) {
+            // File not found in this folder, continue to the next
+          }
+        }
+      } catch (error) {
+        console.error('Error deleting PDF file:', error);
+        Alert.alert('Erreur lors de la suppression du fichier:', error.message);
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       {pdfUrl ? (
-        <Pdf
-          trustAllCerts={false}
-          source={{ uri: pdfUrl, cache: true }}
-          onLoadComplete={(numberOfPages, filePath) => {
-            console.log(`Number of pages: ${numberOfPages}`);
-          }}
-          onPageChanged={(page, numberOfPages) => {
-            console.log(`Current page: ${page}`);
-          }}
-          onError={(error) => {
-            console.log(error);
-          }}
-          onPressLink={(uri) => {
-            console.log(`Link pressed: ${uri}`);
-          }}
-          style={styles.pdf}
-        />
+        <>
+          <Pdf
+            trustAllCerts={false}
+            source={{ uri: pdfUrl, cache: true }}
+            onLoadComplete={(numberOfPages, filePath) => {
+            }}
+            onPageChanged={(page, numberOfPages) => {
+            }}
+            onError={(error) => {
+              console.log(error);
+            }}
+            onPressLink={(uri) => {
+            }}
+            style={styles.pdf}
+          />
+          <Button title="Supprimer" onPress={handleDelete} />
+        </>
       ) : (
         <Text>Loading PDF...</Text>
       )}

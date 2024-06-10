@@ -8,12 +8,6 @@ const More = () => {
 
   const handleLogout = () => {
     FIREBASE_AUTH.signOut()
-      .then(() => {
-        navigation.navigate('Login');
-      })
-      .catch(error => {
-        console.error(error);
-      });
   };
 
   const handleCreateUser = () => {

@@ -91,13 +91,10 @@ export default function App() {
 
   const fetchUserRole = useCallback(async (userId) => {
     try {
-      console.log('Fetching user role for user ID:', userId);
       const userDocRef = doc(FIREBASE_DB, 'users', userId);
       const userDoc = await getDoc(userDocRef);
       if (userDoc.exists()) {
-        console.log('Document exists:', userDoc);
         const userData = userDoc.data();
-        console.log('User data:', userData);
         setRole(userData.role);
       } else {
         console.log('No such document!');
@@ -109,7 +106,6 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
-      console.log('Auth state changed:', user);
       setUser(user);
       if (user) {
         fetchUserRole(user.uid);
@@ -119,9 +115,6 @@ export default function App() {
     });
     return unsubscribe;
   }, [fetchUserRole]);
-
-  console.log('Current user:', user);
-  console.log('Current role:', role);
 
   return (
     <NavigationContainer>
@@ -168,7 +161,7 @@ export default function App() {
               tabBarIcon: ({ focused, color, size }) => {
                 let iconName;
 
-                if (route.name === 'Forms') {
+                if (route.name === 'FormsSS') {
                   iconName = focused
                     ? require('./assets/form_focus.png')
                     : require('./assets/form.png');
@@ -176,7 +169,7 @@ export default function App() {
                   iconName = focused
                     ? require('./assets/user_focus.png')
                     : require('./assets/user.png');
-                } else if (route.name === 'MyForms') {
+                } else if (route.name === 'MyFormsSS') {
                   iconName = focused
                     ? require('./assets/completed_focus.png')
                     : require('./assets/completed.png');
@@ -188,8 +181,8 @@ export default function App() {
               tabBarInactiveTintColor: 'gray',
             })}
           >
-            <Tab.Screen name="Forms" component={FormsStackScreen} options={{ headerShown: false, title: "Bon d'Interventions" }} />
-            <Tab.Screen name="MyForms" component={MyFormsStackScreen} options={{ headerShown: false, title: "Complété" }} />
+            <Tab.Screen name="FormsSS" component={FormsStackScreen} options={{ headerShown: false, title: "Bon d'Interventions" }} />
+            <Tab.Screen name="MyFormsSS" component={MyFormsStackScreen} options={{ headerShown: false, title: "Complété" }} />
             <Tab.Screen name="Profil" component={Profil} />
           </Tab.Navigator>
         )

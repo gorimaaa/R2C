@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { FIREBASE_STORAGE } from '../../FirebaseConfig';
 import { ref, listAll, getDownloadURL, getMetadata } from 'firebase/storage';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Menu, Divider, Provider } from 'react-native-paper';
 
 const fiche = require("../../assets/logo.png");
@@ -83,6 +83,12 @@ const UsersForms = () => {
     const interval = setInterval(() => fetchPdfPreviews(false), 30000);
     return () => clearInterval(interval);
   }, [filters, sortBy, searchQuery]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPdfPreviews(true);
+    }, [])
+  );
 
   const navigation = useNavigation();
 
@@ -197,129 +203,128 @@ const MenuAnchor = ({ handlePress }) => (
     </TouchableOpacity>
   );
   
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#ffffff',
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 20,
-    },
-    searchContainer: {
-      flex: 1,
-    },
-    searchInput: {
-      height: 40,
-      borderColor: '#ccc',
-      borderWidth: 1,
-      borderRadius: 20,
-      paddingLeft: 15,
-      backgroundColor: '#f9f9f9',
-    },
-    selectedFiltersContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      marginBottom: 10,
-      paddingLeft:10,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    selectedFilter: {
-      flexDirection: 'row',
-      backgroundColor: '#4CAF50',
-      padding: 5,
-      margin: 5,
-      alignItems: 'center',
-      borderRadius: 20,
-    },
-    selectedFilterText: {
-      color: '#fff',
-      marginRight: 5,
-    },
-    removeFilterButton: {
-      backgroundColor: '#fff',
-      borderRadius: 10,
-      padding: 5,
-      marginLeft: 5,
-    },
-    removeFilterText: {
-      color: '#4CAF50',
-      fontSize: 12,
-    },
-    pdfListContainer: {
-      padding: 5,
-      flexGrow: 1,
-      justifyContent: 'center',
-      paddingBottom: 20,
-    },
-    columnWrapper: {
-      justifyContent: 'space-between',
-    },
-    pdfPreviewContainer: {
-      flex: 1,
-      margin: 10,
-      backgroundColor: '#fff',
-      borderRadius: 12,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 5,
-      elevation: 8,
-      alignItems: 'center',
-      padding: 10,
-    },
-    placeholderContainer: {
-      backgroundColor: 'transparent',
-      shadowColor: 'transparent',
-      elevation: 0,
-    },
-    pdfPreviewImage: {
-      width: '100%',
-      height: 200,
-      borderTopLeftRadius: 12,
-      borderTopRightRadius: 12,
-    },
-    pdfPreviewInfo: {
-      marginTop: 5,
-      fontSize: 16,
-      textAlign: 'center',
-      color: '#333',
-    },
-    pdfPreviewDate: {
-      marginTop: 5,
-      fontSize: 14,
-      textAlign: 'center',
-      color: 'grey',
-    },
-    menuAnchor: {
-      flexDirection: 'row',
-      padding: 10,
-      paddingHorizontal: 15,
-      borderRadius: 20,
-      backgroundColor: '#3498db',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    menuText: {
-      color: '#fff',
-      fontSize: 16,
-      marginLeft: 5,
-    },
-    noFilesText: {
-      fontSize: 18,
-      color: 'grey',
-      textAlign: 'center',
-      marginTop: 20,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  });
-  
-  export default UsersForms;
-  
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+  },
+  searchContainer: {
+    flex: 1,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingLeft: 15,
+    backgroundColor: '#f9f9f9',
+  },
+  selectedFiltersContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+    paddingLeft:10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectedFilter: {
+    flexDirection: 'row',
+    backgroundColor: '#4CAF50',
+    padding: 5,
+    margin: 5,
+    alignItems: 'center',
+    borderRadius: 20,
+  },
+  selectedFilterText: {
+    color: '#fff',
+    marginRight: 5,
+  },
+  removeFilterButton: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 5,
+    marginLeft: 5,
+  },
+  removeFilterText: {
+    color: '#4CAF50',
+    fontSize: 12,
+  },
+  pdfListContainer: {
+    padding: 5,
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingBottom: 20,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+  },
+  pdfPreviewContainer: {
+    flex: 1,
+    margin: 10,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 8,
+    alignItems: 'center',
+    padding: 10,
+  },
+  placeholderContainer: {
+    backgroundColor: 'transparent',
+    shadowColor: 'transparent',
+    elevation: 0,
+  },
+  pdfPreviewImage: {
+    width: '100%',
+    height: 200,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  pdfPreviewInfo: {
+    marginTop: 5,
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#333',
+  },
+  pdfPreviewDate: {
+    marginTop: 5,
+    fontSize: 14,
+    textAlign: 'center',
+    color: 'grey',
+  },
+  menuAnchor: {
+    flexDirection: 'row',
+    padding: 10,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    backgroundColor: '#3498db',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuText: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 5,
+  },
+  noFilesText: {
+    fontSize: 18,
+    color: 'grey',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+export default UsersForms;

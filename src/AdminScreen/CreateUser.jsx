@@ -29,16 +29,12 @@ const CreateUser = () => {
 
     const UserCreate = async () => {
         try {
-            setLoading(true);
-            console.log('Starting user creation process');
-            
+            setLoading(true);            
             // Save the current user
             const currentUser = FIREBASE_AUTH.currentUser;
 
             const response = await createUserWithEmailAndPassword(FIREBASE_AUTH, username, password);
             const uid = response.user.uid; // Get the user ID
-            console.log('User created with UID:', uid);
-
             const userData = {
                 id: uid,
                 email: username,
@@ -50,15 +46,12 @@ const CreateUser = () => {
             // Create the document in Firestore with the user's UID as the document ID
             const userDoc = doc(FIREBASE_DB, 'users', uid);
             await setDoc(userDoc, userData); // Add user data to Firestore with UID as document ID
-            console.log('User data added to Firestore with UID as document ID');
-
             // Sign out the newly created user
             await signOut(FIREBASE_AUTH);
 
             // Restore the previous user session
             if (currentUser) {
                 await FIREBASE_AUTH.updateCurrentUser(currentUser);
-                console.log('Restored previous user session');
             }
 
             Alert.alert('Compte créé avec succès');
@@ -68,7 +61,6 @@ const CreateUser = () => {
             Alert.alert('Echec dans l\'inscription ' + error.message);
         } finally {
             setLoading(false); // Set loading state back to false after completion (both success and failure)
-            console.log('User creation process finished');
         }
     };
 

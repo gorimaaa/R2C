@@ -18,10 +18,8 @@ const Login = () => {
       const response = await signInWithEmailAndPassword(auth, username, password);
   } catch(error){
       alert('Echec dans la connexion' + error.message);
-  } finally {
-      setLoading(false);
   }
-  };
+};
 
   const handleSignUp = () => {
     navigation.navigate("SignUp");
@@ -60,10 +58,7 @@ const Login = () => {
             <Text style={styles.buttonText}>CONNEXION</Text>
           </Pressable>
         </View>
-        <Text style={styles.footerText}>
-          Vous n'avez pas de compte?{" "}
-          <Text style={styles.signUpText} onPress={handleSignUp}>Inscrivez-vous</Text>
-        </Text>
+   
       </ScrollView>
     </SafeAreaView>
   );

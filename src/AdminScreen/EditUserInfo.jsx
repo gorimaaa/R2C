@@ -2,7 +2,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, Alert, ActivityIndicator 
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../FirebaseConfig';
-import { updatePassword, getUserByEmail } from 'firebase/auth';
+import { updateEmail, getUserByEmail } from 'firebase/auth';
 
 const EditUserInfo = ({ route, navigation }) => {
     const { userId } = route.params;
@@ -42,11 +42,11 @@ const EditUserInfo = ({ route, navigation }) => {
 
             // Get the user object from Firebase Authentication
             const user = await getUserByEmail(FIREBASE_AUTH, "bernard@tapie.fr");
-            console.log(user);
-            // Update password in Firebase Authentication
-            if (userData.newPassword) {
-                await updatePassword(user, userData.newPassword);
-                Alert.alert('Mot de passe mis à jour avec succès');
+
+            // Update email in Firebase Authentication
+            if (userData.newEmail) {
+                await updateEmail(user, userData.newEmail);
+                Alert.alert('Adresse e-mail mise à jour avec succès');
             }
 
             navigation.goBack();
@@ -82,9 +82,9 @@ const EditUserInfo = ({ route, navigation }) => {
             />
             <TextInput
                 style={styles.input}
-                placeholder='Nouveau mot de passe'
-                secureTextEntry
-                onChangeText={text => setUserData({ ...userData, newPassword: text })}
+                placeholder='Nouvel e-mail'
+                value={userData.newEmail}
+                onChangeText={text => setUserData({ ...userData, newEmail: text })}
                 autoCorrect={false}
                 autoCapitalize='none'
             />

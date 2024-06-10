@@ -12,7 +12,6 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 const Pdf1 = () => {
   const route = useRoute();
   const data = route.params;
-  console.log(data.signature);
   const htmlContent = `
   <!DOCTYPE html>
 <!-- Created by pdf2htmlEX (https://github.com/pdf2htmlEX/pdf2htmlEX) -->
@@ -792,13 +791,11 @@ pdf2htmlEX.defaultViewer = new pdf2htmlEX.Viewer({});
       base64: true,
     };
     let file = await RNHTMLtoPDF.convert(options);
-    console.log("FilePath : " + file.filePath)
     const storageRef = ref(FIREBASE_STORAGE, "pdf/test.pdf");
     blob = await uriToBlob(file.filePath)
     await uploadBytes(storageRef, blob);
     const downloadURL = await getDownloadURL(storageRef);
 
-    //console.log("downloadurl" + downloadURL);
     Alert.alert(
       "Exporter avec succès",
       "" /*file.filePath*/,

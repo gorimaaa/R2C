@@ -16,7 +16,6 @@ import Pdf1 from './src/FormsScreen/Pdf1';
 import PDF from './src/PdfScreen/Pdf';
 import MyForms from './src/MyFormsScreen/MyForms';
 import Profil from './src/ProfilScreen/Profil';
-import SignUp from './src/SignUpScreen/SignUp';
 import Login from './src/LoginScreen/Login';
 import CreateUser from './src/AdminScreen/CreateUser';
 import ChangeUserInfo from './src/AdminScreen/ChangeUserInfo';
@@ -43,7 +42,6 @@ function LoginStackScreen() {
   return (
     <FormsStack.Navigator>
       <FormsStack.Screen name="Login" component={Login} options={{title: "Connexion"}} />
-      <FormsStack.Screen name="SignUp" component={SignUp} options={{title: "Inscription"}}/>
     </FormsStack.Navigator>
   );
 }

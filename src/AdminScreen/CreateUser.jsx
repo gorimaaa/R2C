@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
+        
     },
     scrollViewContent: {
         flexGrow: 1,
@@ -200,7 +201,8 @@ const styles = StyleSheet.create({
     buttonView: {
         width: "100%",
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom:100,
+        
     },
     button: {
         backgroundColor: "#3498db",
@@ -209,6 +211,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: "center",
         justifyContent: "center"
+        
     },
     buttonText: {
         color: "white",

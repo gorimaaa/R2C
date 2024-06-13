@@ -33,7 +33,7 @@ const Login = () => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Nom d'utilisateur ou Email"
+            placeholder="Email"
             value={username}
             onChangeText={setUsername}
             autoCapitalize="none"

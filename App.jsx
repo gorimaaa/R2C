@@ -4,8 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import 'react-native-gesture-handler';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { serverTimestamp, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { FIREBASE_DB, FIREBASE_AUTH } from './FirebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -19,7 +18,6 @@ import Profil from './src/ProfilScreen/Profil';
 import Login from './src/LoginScreen/Login';
 import CreateUser from './src/AdminScreen/CreateUser';
 import ChangeUserInfo from './src/AdminScreen/ChangeUserInfo';
-import EditUserInfo from './src/AdminScreen/EditUserInfo';
 import UsersForms from './src/AdminScreen/UsersForms';
 import AdminPdf from './src/AdminScreen/AdminPdf';
 import More from './src/AdminScreen/More';
@@ -59,7 +57,6 @@ function UserInfoStackScreen() {
   return (
     <FormsStack.Navigator>
       <FormsStack.Screen name="ChangeUserInfo" component={ChangeUserInfo} options={{ headerShown: true, title: "Comptes" }} />
-      <FormsStack.Screen name="EditUserInfo" component={EditUserInfo} options={{ headerShown: true, title: "Modifiée comptes" }}/>
     </FormsStack.Navigator>
   );
 }
@@ -87,6 +84,17 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
 
+  const updateLastLogin = async (userId) => {
+    try {
+        const userDocRef = doc(FIREBASE_DB, 'users', userId);
+        await updateDoc(userDocRef, {
+            lastLogin: serverTimestamp()
+        });
+    } catch (error) {
+        console.error('Error updating last login:', error);
+    }
+  };
+
   const fetchUserRole = useCallback(async (userId) => {
     try {
       const userDocRef = doc(FIREBASE_DB, 'users', userId);
@@ -94,6 +102,7 @@ export default function App() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setRole(userData.role);
+
       } else {
         console.log('No such document!');
       }
@@ -107,6 +116,7 @@ export default function App() {
       setUser(user);
       if (user) {
         fetchUserRole(user.uid);
+        updateLastLogin(user.uid); // Ajoutez cette ligne
       } else {
         setRole(null);
       }

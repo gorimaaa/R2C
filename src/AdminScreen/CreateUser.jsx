@@ -3,7 +3,7 @@ import { Alert, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, Vie
 import React, { useState } from 'react';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collection, setDoc, getDoc, doc } from "firebase/firestore";
+import { collection, setDoc, getDoc, doc, serverTimestamp  } from "firebase/firestore";
 import { useNavigation } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Menu, Divider, Provider } from 'react-native-paper';
@@ -41,6 +41,7 @@ const CreateUser = () => {
                 firstName : firstname,
                 lastName : lastname,
                 role: role,
+                lastLogin: serverTimestamp(),
             };
 
             // Create the document in Firestore with the user's UID as the document ID
